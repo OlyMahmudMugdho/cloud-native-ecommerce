@@ -9,6 +9,8 @@ import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import VerifyEmail from '@/pages/VerifyEmail';
 import ResetPassword from '@/pages/ResetPassword';
+import Products from '@/pages/Products';
+import Categories from '@/pages/Categories';
 
 function App() {
   return (
@@ -25,6 +27,8 @@ function App() {
                 <Route path="/verify/:token" element={<VerifyEmail />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/reset-password/:token" element={<ResetPassword />} />
+                <Route path="/products" element={<Products />} />
+                <Route path="/categories" element={<Categories />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </main>
