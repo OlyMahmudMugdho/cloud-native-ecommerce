@@ -32,4 +32,5 @@ func main() {
 	if err != nil {
 		log.Fatalf("Server failed: %v", err)
 	}
+	//fmt.Println("../../inventory-frontend/dist")
 }
