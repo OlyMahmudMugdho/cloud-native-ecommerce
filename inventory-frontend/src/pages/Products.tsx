@@ -118,36 +118,39 @@ export default function Products() {
         return;
       }
   
+      // Prepare product data (without image_url)
+      const productData = {
+        name: formData.name,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        stock: parseInt(formData.stock, 10),
+        category: formData.category,
+      };
+  
+      // Create FormData object
+      const formDataToSend = new FormData();
+      formDataToSend.append('product', JSON.stringify(productData));
+  
+      // Add image if selected
+      if (formData.image) {
+        formDataToSend.append('image', formData.image);
+      }
+  
       if (selectedProduct) {
-        // Update product logic (unchanged)
-        const updateData = {
-          name: formData.name,
-          description: formData.description,
-          price: parseFloat(formData.price),
-          stock: parseInt(formData.stock, 10),
-          category: formData.category,
-        };
-        await products.update(selectedProduct.id, updateData);
+        // Update product
+        await products.update(selectedProduct.id, formDataToSend);
         toast.success('Product updated successfully');
       } else {
-        // Create product logic
-        const productData = {
-          name: formData.name,
-          description: formData.description,
-          price: parseFloat(formData.price),
-          stock: parseInt(formData.stock, 10),
-          category: formData.category,
-        };
-        const formDataToSend = new FormData();
-        formDataToSend.append('product', JSON.stringify(productData));
-        if (formData.image) {
-          formDataToSend.append('image', formData.image);
+        // Create product (image required)
+        if (!formData.image) {
+          toast.error('Image is required for new products');
+          return;
         }
         await products.create(formDataToSend);
         toast.success('Product created successfully');
       }
   
-      // Reset form and dialog (unchanged)
+      // Reset form and dialog
       setIsDialogOpen(false);
       setSelectedProduct(null);
       setFormData({
@@ -159,7 +162,7 @@ export default function Products() {
         image: null,
       });
   
-      // Refresh product list (unchanged)
+      // Refresh product list
       const response = await products.getAll();
       setProductList(response.data || []);
     } catch (error) {
