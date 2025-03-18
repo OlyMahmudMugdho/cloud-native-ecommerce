@@ -71,32 +71,75 @@ func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
-	var updateDTO dto.UpdateProductDTO
-	if err := json.NewDecoder(r.Body).Decode(&updateDTO); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
-		return
-	}
+    // Parse multipart form data with a 10 MB limit
+    err := r.ParseMultipartForm(10 << 20)
+    if err != nil {
+        http.Error(w, "Unable to parse form", http.StatusBadRequest)
+        return
+    }
 
-	// Set the ID from URL before validation
-	vars := mux.Vars(r)
-	updateDTO.ID = vars["id"]
+    // Extract the "product" field from the form data
+    productJSON := r.FormValue("product")
+    if productJSON == "" {
+        http.Error(w, "Missing product data", http.StatusBadRequest)
+        return
+    }
 
-	// Validate after setting the ID
-	if err := h.validator.Struct(updateDTO); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
+    // Unmarshal the JSON string into UpdateProductDTO
+    var updateDTO dto.UpdateProductDTO
+    err = json.Unmarshal([]byte(productJSON), &updateDTO)
+    if err != nil {
+        http.Error(w, "Invalid product data", http.StatusBadRequest)
+        return
+    }
 
-	product := updateDTO.ToModel()
+    // Set the ID from the URL
+    vars := mux.Vars(r)
+    updateDTO.ID = vars["id"]
 
-	err := h.usecase.Update(product)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+    // Validate the DTO
+    if err := h.validator.Struct(updateDTO); err != nil {
+        http.Error(w, err.Error(), http.StatusBadRequest)
+        return
+    }
 
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(product)
+    // Convert DTO to model
+    product := updateDTO.ToModel()
+
+    // Handle the image
+    file, _, err := r.FormFile("image")
+    if err == nil {
+        // New image provided, upload to Cloudinary
+        imageURL, err := h.cloudinarySvc.UploadImage(file)
+        if err != nil {
+            http.Error(w, "Failed to upload image", http.StatusInternalServerError)
+            return
+        }
+        product.ImageURL = imageURL
+    } else {
+        // No new image, preserve the existing one
+        fetchedProduct, err := h.usecase.GetByID(updateDTO.ID)
+        if err != nil {
+            http.Error(w, err.Error(), http.StatusInternalServerError)
+            return
+        }
+        if fetchedProduct == nil {
+            http.Error(w, "Product not found", http.StatusNotFound)
+            return
+        }
+        product.ImageURL = fetchedProduct.ImageURL
+    }
+
+    // Update the product
+    err = h.usecase.Update(product)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    // Send success response
+    w.WriteHeader(http.StatusOK)
+    json.NewEncoder(w).Encode(product)
 }
 
 func (h *ProductHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
