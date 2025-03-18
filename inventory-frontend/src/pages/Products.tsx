@@ -112,21 +112,42 @@ export default function Products() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const formDataToSend = new FormData();
-      Object.entries(formData).forEach(([key, value]) => {
-        if (value !== null) {
-          formDataToSend.append(key, value.toString());
-        }
-      });
-
+      // Validate price and stock
+      if (isNaN(parseFloat(formData.price)) || isNaN(parseInt(formData.stock, 10))) {
+        toast.error('Price and stock must be valid numbers');
+        return;
+      }
+  
       if (selectedProduct) {
-        await products.update(selectedProduct.id, formDataToSend);
+        // Update product logic (unchanged)
+        const updateData = {
+          name: formData.name,
+          description: formData.description,
+          price: parseFloat(formData.price),
+          stock: parseInt(formData.stock, 10),
+          category: formData.category,
+        };
+        await products.update(selectedProduct.id, updateData);
         toast.success('Product updated successfully');
       } else {
+        // Create product logic
+        const productData = {
+          name: formData.name,
+          description: formData.description,
+          price: parseFloat(formData.price),
+          stock: parseInt(formData.stock, 10),
+          category: formData.category,
+        };
+        const formDataToSend = new FormData();
+        formDataToSend.append('product', JSON.stringify(productData));
+        if (formData.image) {
+          formDataToSend.append('image', formData.image);
+        }
         await products.create(formDataToSend);
         toast.success('Product created successfully');
       }
-
+  
+      // Reset form and dialog (unchanged)
       setIsDialogOpen(false);
       setSelectedProduct(null);
       setFormData({
@@ -137,11 +158,13 @@ export default function Products() {
         category: '',
         image: null,
       });
-      
+  
+      // Refresh product list (unchanged)
       const response = await products.getAll();
       setProductList(response.data || []);
     } catch (error) {
       toast.error('Failed to save product');
+      console.error(error);
     }
   };
 
@@ -192,7 +215,7 @@ export default function Products() {
         {isAdmin && (
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
+              <Button className='bg-blue-500 hover:bg-blue-600 text-white'>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Product
               </Button>
@@ -276,7 +299,7 @@ export default function Products() {
                     onChange={handleInputChange}
                   />
                 </div>
-                <Button type="submit" className="w-full">
+                <Button type="submit" className="w-full bg-blue-500 hover:bg-blue-600 text-white">
                   {selectedProduct ? 'Update Product' : 'Create Product'}
                 </Button>
               </form>
@@ -347,6 +370,7 @@ export default function Products() {
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancel</AlertDialogCancel>
                               <AlertDialogAction
+                                className="bg-red-500 hover:bg-red-600 text-white"
                                 onClick={() => handleDelete(product.id)}
                               >
                                 Delete
