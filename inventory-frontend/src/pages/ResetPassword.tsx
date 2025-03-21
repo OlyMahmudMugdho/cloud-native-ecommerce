@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Loader2 } from 'lucide-react';
 
 export default function ResetPassword() {
-  const { token } = useParams();
+  const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
@@ -48,9 +48,9 @@ export default function ResetPassword() {
 
   return (
     <div className="container max-w-lg mx-auto px-4">
-      <Card>
+      <Card className="mt-8 bg-background border-border">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">
+          <CardTitle className="text-2xl font-bold text-center text-foreground">
             Reset Password
           </CardTitle>
         </CardHeader>
@@ -64,9 +64,10 @@ export default function ResetPassword() {
               placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              className="bg-background text-foreground border-border"
             />
             <Button
-              className="w-full"
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white"
               onClick={handleRequestReset}
               disabled={loading || !email}
             >
@@ -76,7 +77,7 @@ export default function ResetPassword() {
           </div>
           <Button
             variant="link"
-            className="w-full"
+            className="w-full text-blue-500 hover:text-blue-600"
             onClick={() => navigate('/login')}
           >
             Back to Login

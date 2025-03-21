@@ -52,9 +52,9 @@ export function AuthForm({ mode, onSubmit, title }: AuthFormProps) {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card className="w-full max-w-md mx-auto mt-8 bg-background border-border">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold text-center">{title}</CardTitle>
+        <CardTitle className="text-2xl font-bold text-center text-foreground">{title}</CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -64,11 +64,12 @@ export function AuthForm({ mode, onSubmit, title }: AuthFormProps) {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel className="text-foreground">Email</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Enter your email"
                       type="email"
+                      className="bg-background text-foreground border-border"
                       {...field}
                     />
                   </FormControl>
@@ -81,11 +82,12 @@ export function AuthForm({ mode, onSubmit, title }: AuthFormProps) {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel className="text-foreground">Password</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Enter your password"
                       type="password"
+                      className="bg-background text-foreground border-border"
                       {...field}
                     />
                   </FormControl>
@@ -96,7 +98,7 @@ export function AuthForm({ mode, onSubmit, title }: AuthFormProps) {
             <div className="space-y-4">
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full bg-blue-500 hover:bg-blue-600 text-white"
                 disabled={loading}
               >
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -106,14 +108,14 @@ export function AuthForm({ mode, onSubmit, title }: AuthFormProps) {
                 <div className="text-center space-y-2">
                   <Button
                     variant="link"
-                    className="text-sm"
+                    className="text-sm text-blue-500 hover:text-blue-600"
                     onClick={() => navigate('/register')}
                   >
                     Don't have an account? Sign Up
                   </Button>
                   <Button
                     variant="link"
-                    className="text-sm block mx-auto"
+                    className="text-sm text-blue-500 hover:text-blue-600 block mx-auto"
                     onClick={() => navigate('/reset-password')}
                   >
                     Forgot your password?
@@ -123,7 +125,7 @@ export function AuthForm({ mode, onSubmit, title }: AuthFormProps) {
               {mode === 'register' && (
                 <Button
                   variant="link"
-                  className="text-sm w-full"
+                  className="text-sm text-blue-500 hover:text-blue-600 w-full"
                   onClick={() => navigate('/login')}
                 >
                   Already have an account? Sign In
