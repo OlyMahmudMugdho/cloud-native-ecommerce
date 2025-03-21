@@ -13,6 +13,8 @@ import Products from '@/pages/Products';
 import ProductDetails from '@/pages/ProductDetails'; // New import
 import Categories from '@/pages/Categories';
 import CategoryDetails from '@/pages/CategoryDetails'; // New import
+import UserManagementDetail from './pages/UserManagementDetail';
+import UserManagement from './pages/UserManagement';
 
 function App() {
   return (
@@ -34,6 +36,8 @@ function App() {
                 <Route path="/categories" element={<Categories />} />
                 <Route path="/categories/:id" element={<CategoryDetails />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
+                <Route path="/user-management" element={<UserManagement />} />
+                <Route path="/user-management/:id" element={<UserManagementDetail />} />
               </Routes>
             </main>
             <Footer />

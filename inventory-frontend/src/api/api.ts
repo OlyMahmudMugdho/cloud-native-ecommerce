@@ -73,4 +73,11 @@ export const categories = {
   delete: (id: string) => api.delete(`/categories/${id}`),
 };
 
+export const users = {
+  getAll: () => api.get('/users', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }),
+  getOne: (id: string) => api.get(`/users/${id}`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }),
+  update: (id: string, data: any) => api.put(`/users/${id}`, data, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }),
+  delete: (id: string) => api.delete(`/users/${id}`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }),
+};
+
 export default api;

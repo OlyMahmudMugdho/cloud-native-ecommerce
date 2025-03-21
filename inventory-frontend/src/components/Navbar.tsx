@@ -13,7 +13,7 @@ import {
 import { Menu, LogOut, Sun, Moon } from 'lucide-react';
 
 export default function Navbar() {
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, isAdmin, logout } = useAuth(); // Added isAdmin
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -38,6 +38,11 @@ export default function Navbar() {
       <Link to="/categories" className="text-foreground hover:text-primary">
         Categories
       </Link>
+      {isAuthenticated && isAdmin && ( // Added User Management link for admins only
+        <Link to="/user-management" className="text-foreground hover:text-primary">
+          User Management
+        </Link>
+      )}
       {!isAuthenticated ? (
         <>
           <Link to="/login" className="text-foreground hover:text-primary">
