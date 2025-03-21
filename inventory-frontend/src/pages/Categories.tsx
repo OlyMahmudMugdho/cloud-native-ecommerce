@@ -31,7 +31,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Pencil, Trash2, Plus, Loader2 } from 'lucide-react';
+import { Pencil, Trash2, Plus, Loader2, Eye } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface Category {
   id: string;
@@ -64,10 +65,8 @@ export default function Categories() {
       }
     };
 
-    if (isAuthenticated) {
-      fetchCategories();
-    }
-  }, [isAuthenticated]);
+    fetchCategories(); // Public access, no auth check
+  }, []); // No dependencies, runs on mount
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -77,7 +76,16 @@ export default function Categories() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      if (!isAuthenticated) {
+        toast.error('Please log in to save a category');
+        return;
+      }
+
       if (selectedCategory) {
+        if (!isAdmin) {
+          toast.error('Only admins can update categories');
+          return;
+        }
         await categories.update(selectedCategory.id, formData);
         toast.success('Category updated successfully');
       } else {
@@ -88,26 +96,43 @@ export default function Categories() {
       setIsDialogOpen(false);
       setSelectedCategory(null);
       setFormData({ name: '', description: '' });
-      
+
       const response = await categories.getAll();
       setCategoryList(response.data || []);
-    } catch (error) {
-      toast.error('Failed to save category');
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        toast.error('Only admins can perform this action');
+      } else {
+        toast.error('Failed to save category');
+      }
+      console.error(error);
     }
   };
 
   const handleDelete = async (id: string) => {
     try {
+      if (!isAdmin) {
+        toast.error('Only admins can delete categories');
+        return;
+      }
       await categories.delete(id);
       toast.success('Category deleted successfully');
       const response = await categories.getAll();
       setCategoryList(response.data || []);
-    } catch (error) {
-      toast.error('Failed to delete category');
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        toast.error('Only admins can delete categories');
+      } else {
+        toast.error('Failed to delete category');
+      }
     }
   };
 
   const handleEdit = (category: Category) => {
+    if (!isAdmin) {
+      toast.error('Only admins can edit categories');
+      return;
+    }
     setSelectedCategory(category);
     setFormData({
       name: category.name,
@@ -115,14 +140,6 @@ export default function Categories() {
     });
     setIsDialogOpen(true);
   };
-
-  if (!isAuthenticated) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-4">Please login to view categories</h1>
-      </div>
-    );
-  }
 
   if (isLoading) {
     return (
@@ -136,10 +153,10 @@ export default function Categories() {
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Categories</h1>
-        {isAdmin && (
+        {isAuthenticated && (
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
+              <Button className="bg-blue-500 hover:bg-blue-600 text-white">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Category
               </Button>
@@ -171,7 +188,7 @@ export default function Categories() {
                     required
                   />
                 </div>
-                <Button type="submit" className="w-full">
+                <Button type="submit" className="w-full bg-blue-500 hover:bg-blue-600 text-white">
                   {selectedCategory ? 'Update Category' : 'Create Category'}
                 </Button>
               </form>
@@ -182,7 +199,8 @@ export default function Categories() {
 
       {categoryList.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">
-          No categories found. {isAdmin && 'Click "Add Category" to create one.'}
+          No categories found.{' '}
+          {isAuthenticated && 'Click "Add Category" to create one.'}
         </div>
       ) : (
         <div className="border rounded-lg overflow-hidden">
@@ -191,7 +209,7 @@ export default function Categories() {
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Description</TableHead>
-                {isAdmin && <TableHead>Actions</TableHead>}
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -199,43 +217,55 @@ export default function Categories() {
                 <TableRow key={category.id}>
                   <TableCell className="font-medium">{category.name}</TableCell>
                   <TableCell>{category.description}</TableCell>
-                  {isAdmin && (
-                    <TableCell>
-                      <div className="flex space-x-2">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => handleEdit(category)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="outline" size="icon">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Category</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to delete this category? This
-                                action cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDelete(category.id)}
-                              >
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
-                    </TableCell>
-                  )}
+                  <TableCell>
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        asChild
+                      >
+                        <Link to={`/categories/${category.id}`}>
+                          <Eye className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                      {isAuthenticated && isAdmin && (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => handleEdit(category)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="outline" size="icon">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Category</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete this category? This
+                                  action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  className="bg-red-500 hover:bg-red-600 text-white"
+                                  onClick={() => handleDelete(category.id)}
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </>
+                      )}
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

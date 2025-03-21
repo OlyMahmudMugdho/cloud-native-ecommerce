@@ -10,7 +10,9 @@ import Register from '@/pages/Register';
 import VerifyEmail from '@/pages/VerifyEmail';
 import ResetPassword from '@/pages/ResetPassword';
 import Products from '@/pages/Products';
+import ProductDetails from '@/pages/ProductDetails'; // New import
 import Categories from '@/pages/Categories';
+import CategoryDetails from '@/pages/CategoryDetails'; // New import
 
 function App() {
   return (
@@ -28,7 +30,9 @@ function App() {
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/reset-password/:token" element={<ResetPassword />} />
                 <Route path="/products" element={<Products />} />
+                <Route path="/products/:id" element={<ProductDetails />} />
                 <Route path="/categories" element={<Categories />} />
+                <Route path="/categories/:id" element={<CategoryDetails />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </main>

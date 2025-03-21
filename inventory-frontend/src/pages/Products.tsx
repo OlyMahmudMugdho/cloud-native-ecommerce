@@ -38,7 +38,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Pencil, Trash2, Plus, Loader2 } from 'lucide-react';
+import { Pencil, Trash2, Plus, Loader2, Eye } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface Product {
   id: string;
@@ -91,8 +92,8 @@ export default function Products() {
       }
     };
 
-    initializeData(); // Fetch data regardless of authentication status
-  }, []); // No dependencies, runs on mount
+    initializeData(); // Public access, no auth check
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, files } = e.target;
@@ -307,7 +308,7 @@ export default function Products() {
                     type="file"
                     accept="image/*"
                     onChange={handleInputChange}
-                    required={!selectedProduct} // Image optional for updates
+                    required={!selectedProduct}
                   />
                   {selectedProduct && selectedProduct.image_url && (
                     <div>
@@ -345,7 +346,7 @@ export default function Products() {
                 <TableHead>Price</TableHead>
                 <TableHead>Stock</TableHead>
                 <TableHead>Category</TableHead>
-                {isAuthenticated && <TableHead>Actions</TableHead>}
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -365,48 +366,55 @@ export default function Products() {
                   <TableCell>${product.price.toFixed(2)}</TableCell>
                   <TableCell>{product.stock}</TableCell>
                   <TableCell>{product.category}</TableCell>
-                  {isAuthenticated && (
-                    <TableCell>
-                      <div className="flex space-x-2">
-                        {isAdmin && (
-                          <>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => handleEdit(product)}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button variant="outline" size="icon">
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Delete Product</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Are you sure you want to delete this product? This
-                                    action cannot be undone.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction
-                                    className="bg-red-500 hover:bg-red-600 text-white"
-                                    onClick={() => handleDelete(product.id)}
-                                  >
-                                    Delete
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          </>
-                        )}
-                      </div>
-                    </TableCell>
-                  )}
+                  <TableCell>
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        asChild
+                      >
+                        <Link to={`/products/${product.id}`}>
+                          <Eye className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                      {isAuthenticated && isAdmin && (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => handleEdit(product)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="outline" size="icon">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Product</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete this product? This
+                                  action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  className="bg-red-500 hover:bg-red-600 text-white"
+                                  onClick={() => handleDelete(product.id)}
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </>
+                      )}
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
