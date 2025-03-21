@@ -19,9 +19,9 @@ import (
 func SetupRouter(mongoClient *db.MongoClient, cfg *config.Config) *mux.Router {
 	r := mux.NewRouter()
 
-	// API subrouter with /api/ prefix (register FIRST)
-	apiRouter := r.PathPrefix("/api").Subrouter()
-	log.Println("API router initialized with prefix /api")
+	// API subrouter with /inventory/api prefix
+	apiRouter := r.PathPrefix("/inventory/api").Subrouter()
+	log.Println("API router initialized with prefix /inventory/api")
 
 	// Initialize repositories
 	productRepo := repository.NewProductRepository(mongoClient, "inventory_db", "products")
@@ -42,31 +42,34 @@ func SetupRouter(mongoClient *db.MongoClient, cfg *config.Config) *mux.Router {
 	userHandler := handlers.NewUserHandler(userUsecase)
 	categoryHandler := handlers.NewCategoryHandler(categoryUsecase)
 
-	// Public routes under /api/
+	// Public routes under /inventory/api
 	apiRouter.HandleFunc("/users/register", userHandler.Register).Methods("POST")
 	apiRouter.HandleFunc("/users/login", userHandler.Login).Methods("POST")
-	log.Println("Registering route: /api/users/verify/{token}")
+	log.Println("Registering route: /inventory/api/users/verify/{token}")
 	apiRouter.HandleFunc("/users/verify/{token}", userHandler.VerifyEmail).Methods("GET")
 	apiRouter.HandleFunc("/users/password/reset", userHandler.RequestPasswordReset).Methods("POST")
 	apiRouter.HandleFunc("/users/password/reset/{token}", userHandler.ResetPassword).Methods("POST")
 
-	// Protected routes under /api/
+	// Public GET routes for products and categories
+	apiRouter.HandleFunc("/products", productHandler.GetAllProducts).Methods("GET")
+	apiRouter.HandleFunc("/products/{id}", productHandler.GetProduct).Methods("GET")
+	apiRouter.HandleFunc("/categories", categoryHandler.GetAllCategories).Methods("GET")
+	apiRouter.HandleFunc("/categories/{id}", categoryHandler.GetCategory).Methods("GET")
+
+	// Protected routes under /inventory/api (authentication required)
 	authRouter := apiRouter.PathPrefix("/").Subrouter()
 	authRouter.Use(middleware.AuthMiddleware)
 
-	authRouter.HandleFunc("/products", productHandler.GetAllProducts).Methods("GET")
-	authRouter.HandleFunc("/products/{id}", productHandler.GetProduct).Methods("GET")
-	authRouter.HandleFunc("/categories", categoryHandler.GetAllCategories).Methods("GET")
-	authRouter.HandleFunc("/categories/{id}", categoryHandler.GetCategory).Methods("GET")
+	// Routes accessible to all authenticated users
+	authRouter.HandleFunc("/products", productHandler.CreateProduct).Methods("POST")
+	authRouter.HandleFunc("/categories", categoryHandler.CreateCategory).Methods("POST")
 
-	// Admin-only routes under /api/
+	// Admin-only routes under /inventory/api (authentication + admin role required)
 	adminRouter := authRouter.PathPrefix("/").Subrouter()
 	adminRouter.Use(middleware.AdminOnly)
 
-	adminRouter.HandleFunc("/products", productHandler.CreateProduct).Methods("POST")
 	adminRouter.HandleFunc("/products/{id}", productHandler.UpdateProduct).Methods("PUT")
 	adminRouter.HandleFunc("/products/{id}", productHandler.DeleteProduct).Methods("DELETE")
-	adminRouter.HandleFunc("/categories", categoryHandler.CreateCategory).Methods("POST")
 	adminRouter.HandleFunc("/categories/{id}", categoryHandler.UpdateCategory).Methods("PUT")
 	adminRouter.HandleFunc("/categories/{id}", categoryHandler.DeleteCategory).Methods("DELETE")
 
