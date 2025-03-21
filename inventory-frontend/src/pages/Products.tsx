@@ -61,6 +61,7 @@ export default function Products() {
         ]);
         setProductList(productsResponse.data || []);
         setCategoryList(categoriesResponse.data || []);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         toast.error('Failed to load data');
         setProductList([]);
@@ -83,6 +84,7 @@ export default function Products() {
       toast.success('Product deleted successfully');
       const response = await products.getAll();
       setProductList(response.data || []);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       if (error.response?.status === 403) {
         toast.error('Only admins can delete products');

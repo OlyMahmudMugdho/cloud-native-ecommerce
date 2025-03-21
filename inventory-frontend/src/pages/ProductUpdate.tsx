@@ -71,6 +71,7 @@ export default function ProductUpdate() {
           category: fetchedProduct.category,
           image: null,
         });
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         toast.error('Failed to load product data');
         navigate('/products');
@@ -129,6 +130,7 @@ export default function ProductUpdate() {
       await products.update(id!, formDataToSend);
       toast.success('Product updated successfully');
       navigate('/products');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       if (error.response?.status === 403) {
         toast.error('Only admins can update products');
