@@ -15,6 +15,7 @@ import Categories from '@/pages/Categories';
 import CategoryDetails from '@/pages/CategoryDetails'; // New import
 import UserManagementDetail from './pages/UserManagementDetail';
 import UserManagement from './pages/UserManagement';
+import ProductUpdate from './pages/ProductUpdate';
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
                 <Route path="/reset-password/:token" element={<ResetPassword />} />
                 <Route path="/products" element={<Products />} />
                 <Route path="/products/:id" element={<ProductDetails />} />
+                <Route path="/products/edit/:id" element={<ProductUpdate />} />
                 <Route path="/categories" element={<Categories />} />
                 <Route path="/categories/:id" element={<CategoryDetails />} />
                 <Route path="*" element={<Navigate to="/" replace />} />

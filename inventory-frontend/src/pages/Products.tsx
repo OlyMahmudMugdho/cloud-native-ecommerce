@@ -11,13 +11,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -29,15 +22,6 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Pencil, Trash2, Plus, Loader2, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -61,17 +45,11 @@ export default function Products() {
   const { isAuthenticated, isAdmin } = useAuth();
   const [productList, setProductList] = useState<Product[]>([]);
   const [categoryList, setCategoryList] = useState<Category[]>([]);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    price: '',
-    stock: '',
-    category: '',
-    image: null as File | null,
-  });
+
+  if (categoryList.length === 0) {
+    console.info();
+  }
 
   useEffect(() => {
     const initializeData = async () => {
@@ -95,86 +73,6 @@ export default function Products() {
     initializeData(); // Public access, no auth check
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, files } = e.target;
-    if (name === 'image' && files) {
-      setFormData((prev) => ({ ...prev, image: files[0] }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
-  };
-
-  const handleSelectChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, category: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      if (!isAuthenticated) {
-        toast.error('Please log in to save a product');
-        return;
-      }
-
-      if (isNaN(parseFloat(formData.price)) || isNaN(parseInt(formData.stock, 10))) {
-        toast.error('Price and stock must be valid numbers');
-        return;
-      }
-
-      const productData = {
-        name: formData.name,
-        description: formData.description,
-        price: parseFloat(formData.price),
-        stock: parseInt(formData.stock, 10),
-        category: formData.category,
-      };
-
-      const formDataToSend = new FormData();
-      formDataToSend.append('product', JSON.stringify(productData));
-
-      if (formData.image) {
-        formDataToSend.append('image', formData.image);
-      }
-
-      if (selectedProduct) {
-        if (!isAdmin) {
-          toast.error('Only admins can update products');
-          return;
-        }
-        await products.update(selectedProduct.id, formDataToSend);
-        toast.success('Product updated successfully');
-      } else {
-        if (!formData.image) {
-          toast.error('Image is required for new products');
-          return;
-        }
-        await products.create(formDataToSend);
-        toast.success('Product created successfully');
-      }
-
-      setIsDialogOpen(false);
-      setSelectedProduct(null);
-      setFormData({
-        name: '',
-        description: '',
-        price: '',
-        stock: '',
-        category: '',
-        image: null,
-      });
-
-      const response = await products.getAll();
-      setProductList(response.data || []);
-    } catch (error: any) {
-      if (error.response?.status === 403) {
-        toast.error('Only admins can perform this action');
-      } else {
-        toast.error('Failed to save product');
-      }
-      console.error(error);
-    }
-  };
-
   const handleDelete = async (id: string) => {
     try {
       if (!isAdmin) {
@@ -194,23 +92,6 @@ export default function Products() {
     }
   };
 
-  const handleEdit = (product: Product) => {
-    if (!isAdmin) {
-      toast.error('Only admins can edit products');
-      return;
-    }
-    setSelectedProduct(product);
-    setFormData({
-      name: product.name,
-      description: product.description,
-      price: product.price.toString(),
-      stock: product.stock.toString(),
-      category: product.category,
-      image: null,
-    });
-    setIsDialogOpen(true);
-  };
-
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8 flex items-center justify-center">
@@ -224,109 +105,12 @@ export default function Products() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Products</h1>
         {isAuthenticated && (
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-blue-500 hover:bg-blue-600 text-white">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Product
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>
-                  {selectedProduct ? 'Edit Product' : 'Add New Product'}
-                </DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Name</Label>
-                  <Input
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Input
-                    id="description"
-                    name="description"
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="price">Price</Label>
-                  <Input
-                    id="price"
-                    name="price"
-                    type="number"
-                    step="0.01"
-                    value={formData.price}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="stock">Stock</Label>
-                  <Input
-                    id="stock"
-                    name="stock"
-                    type="number"
-                    value={formData.stock}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="category">Category</Label>
-                  <Select
-                    value={formData.category}
-                    onValueChange={handleSelectChange}
-                    required
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categoryList.map((category) => (
-                        <SelectItem key={category.id} value={category.name}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="image">Image</Label>
-                  <Input
-                    id="image"
-                    name="image"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleInputChange}
-                    required={!selectedProduct}
-                  />
-                  {selectedProduct && selectedProduct.image_url && (
-                    <div>
-                      <Label>Current Image</Label>
-                      <img
-                        src={selectedProduct.image_url}
-                        alt="Current product image"
-                        className="w-32 h-32 object-cover mt-2"
-                      />
-                    </div>
-                  )}
-                </div>
-                <Button type="submit" className="w-full bg-blue-500 hover:bg-blue-600 text-white">
-                  {selectedProduct ? 'Update Product' : 'Create Product'}
-                </Button>
-              </form>
-            </DialogContent>
-          </Dialog>
+          <Button asChild className="bg-blue-500 hover:bg-blue-600 text-white">
+            <Link to="/products/new">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Product
+            </Link>
+          </Button>
         )}
       </div>
 
@@ -368,23 +152,17 @@ export default function Products() {
                   <TableCell>{product.category}</TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        asChild
-                      >
+                      <Button variant="outline" size="icon" asChild>
                         <Link to={`/products/${product.id}`}>
                           <Eye className="h-4 w-4" />
                         </Link>
                       </Button>
                       {isAuthenticated && isAdmin && (
                         <>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => handleEdit(product)}
-                          >
-                            <Pencil className="h-4 w-4" />
+                          <Button variant="outline" size="icon" asChild>
+                            <Link to={`/products/edit/${product.id}`}>
+                              <Pencil className="h-4 w-4" />
+                            </Link>
                           </Button>
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
