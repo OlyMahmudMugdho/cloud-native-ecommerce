@@ -17,6 +17,7 @@ type Config struct {
 	SMTPPort            int    `yaml:"smtp_port"`
 	SMTPUsername        string `yaml:"smtp_username"`
 	SMTPPassword        string `yaml:"smtp_password"`
+	ServiceAPIKey       string `yaml:"service_api_key"`
 }
 
 func LoadConfig(filename string) (*Config, error) {

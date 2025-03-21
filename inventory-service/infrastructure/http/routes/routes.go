@@ -27,7 +27,8 @@ func SetupRouter(mongoClient *db.MongoClient, cfg *config.Config) *mux.Router {
 	productRepo := repository.NewProductRepository(mongoClient, "inventory_db", "products")
 	userRepo := repository.NewUserRepository(mongoClient, "inventory_db", "users")
 	categoryRepo := repository.NewCategoryRepository(mongoClient, "inventory_db", "categories")
-	userInfoRepo := repository.NewUserInfoRepository(mongoClient, "inventory_db", "users") // New repository
+	userInfoRepo := repository.NewUserInfoRepository(mongoClient, "inventory_db", "users")
+	stockRepo := repository.NewStockRepository(mongoClient, "inventory_db", "products") // New stock repository
 
 	// Initialize services
 	cloudinarySvc := services.NewCloudinaryService(cfg.CloudinaryCloudName, cfg.CloudinaryAPIKey, cfg.CloudinaryAPISecret)
@@ -37,13 +38,15 @@ func SetupRouter(mongoClient *db.MongoClient, cfg *config.Config) *mux.Router {
 	productUsecase := application.NewProductUsecase(productRepo)
 	userUsecase := application.NewUserUsecase(userRepo, emailSvc)
 	categoryUsecase := application.NewCategoryUsecase(categoryRepo)
-	userInfoUsecase := application.NewUserInfoUsecase(userInfoRepo) // New use case
+	userInfoUsecase := application.NewUserInfoUsecase(userInfoRepo)
+	stockUsecase := application.NewStockUsecase(stockRepo) // New stock use case
 
 	// Initialize handlers
 	productHandler := handlers.NewProductHandler(productUsecase, cloudinarySvc)
 	userHandler := handlers.NewUserHandler(userUsecase)
 	categoryHandler := handlers.NewCategoryHandler(categoryUsecase)
-	userInfoHandler := handlers.NewUserInfoHandler(userInfoUsecase) // New handler
+	userInfoHandler := handlers.NewUserInfoHandler(userInfoUsecase)
+	stockHandler := handlers.NewStockHandler(stockUsecase) // New stock handler
 
 	// Public routes under /inventory/api
 	apiRouter.HandleFunc("/users/register", userHandler.Register).Methods("POST")
@@ -81,6 +84,11 @@ func SetupRouter(mongoClient *db.MongoClient, cfg *config.Config) *mux.Router {
 	adminRouter.HandleFunc("/users/{id}", userInfoHandler.GetByID).Methods("GET")
 	adminRouter.HandleFunc("/users/{id}", userInfoHandler.Update).Methods("PUT")
 	adminRouter.HandleFunc("/users/{id}", userInfoHandler.Delete).Methods("DELETE")
+
+	// Service-only routes under /inventory/api (API key required)
+	serviceRouter := apiRouter.PathPrefix("/").Subrouter()
+	serviceRouter.Use(middleware.ServiceAuthMiddleware(cfg))
+	serviceRouter.HandleFunc("/stocks/bulk-update", stockHandler.BulkUpdateStock).Methods("POST")
 
 	// Serve static React build files from cmd/dist with SPA fallback
 	fs := http.FileServer(http.Dir("cmd/dist"))
