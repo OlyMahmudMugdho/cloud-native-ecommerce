@@ -1,0 +1,11 @@
+port: "8080"
+mongo_url: "mongodb://localhost:27017"
+cloudinary_cloud_name: "<cloud_name>"
+cloudinary_api_key: "<cloudinary_api_key>"
+cloudinary_api_secret: "<cloudinary_api_secret>"
+email_from: "<email_from>"
+smtp_host: "<smtp_host>"
+smtp_port: 587
+smtp_username: "<smtp_username>"
+smtp_password: "<smtp_password>"
+service_api_key: "<random_api_key>"
