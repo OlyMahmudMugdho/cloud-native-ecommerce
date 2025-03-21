@@ -16,6 +16,7 @@ import CategoryDetails from '@/pages/CategoryDetails'; // New import
 import UserManagementDetail from './pages/UserManagementDetail';
 import UserManagement from './pages/UserManagement';
 import ProductUpdate from './pages/ProductUpdate';
+import CategoryUpdate from './pages/CategoryUpdate';
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
                 <Route path="/products/edit/:id" element={<ProductUpdate />} />
                 <Route path="/categories" element={<Categories />} />
                 <Route path="/categories/:id" element={<CategoryDetails />} />
+                <Route path="/categories/edit/:id" element={<CategoryUpdate />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
                 <Route path="/user-management" element={<UserManagement />} />
                 <Route path="/user-management/:id" element={<UserManagementDetail />} />

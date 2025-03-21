@@ -11,13 +11,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -29,8 +22,6 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Pencil, Trash2, Plus, Loader2, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -43,71 +34,25 @@ interface Category {
 export default function Categories() {
   const { isAuthenticated, isAdmin } = useAuth();
   const [categoryList, setCategoryList] = useState<Category[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-  });
 
   useEffect(() => {
-    const fetchCategories = async () => {
+    const initializeData = async () => {
       try {
         setIsLoading(true);
         const response = await categories.getAll();
         setCategoryList(response.data || []);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
-        toast.error('Failed to fetch categories');
+        toast.error('Failed to load categories');
         setCategoryList([]);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchCategories(); // Public access, no auth check
-  }, []); // No dependencies, runs on mount
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      if (!isAuthenticated) {
-        toast.error('Please log in to save a category');
-        return;
-      }
-
-      if (selectedCategory) {
-        if (!isAdmin) {
-          toast.error('Only admins can update categories');
-          return;
-        }
-        await categories.update(selectedCategory.id, formData);
-        toast.success('Category updated successfully');
-      } else {
-        await categories.create(formData);
-        toast.success('Category created successfully');
-      }
-
-      setIsDialogOpen(false);
-      setSelectedCategory(null);
-      setFormData({ name: '', description: '' });
-
-      const response = await categories.getAll();
-      setCategoryList(response.data || []);
-    } catch (error: any) {
-      if (error.response?.status === 403) {
-        toast.error('Only admins can perform this action');
-      } else {
-        toast.error('Failed to save category');
-      }
-      console.error(error);
-    }
-  };
+    initializeData();
+  }, []);
 
   const handleDelete = async (id: string) => {
     try {
@@ -119,6 +64,7 @@ export default function Categories() {
       toast.success('Category deleted successfully');
       const response = await categories.getAll();
       setCategoryList(response.data || []);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       if (error.response?.status === 403) {
         toast.error('Only admins can delete categories');
@@ -126,19 +72,6 @@ export default function Categories() {
         toast.error('Failed to delete category');
       }
     }
-  };
-
-  const handleEdit = (category: Category) => {
-    if (!isAdmin) {
-      toast.error('Only admins can edit categories');
-      return;
-    }
-    setSelectedCategory(category);
-    setFormData({
-      name: category.name,
-      description: category.description,
-    });
-    setIsDialogOpen(true);
   };
 
   if (isLoading) {
@@ -154,46 +87,12 @@ export default function Categories() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Categories</h1>
         {isAuthenticated && (
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-blue-500 hover:bg-blue-600 text-white">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Category
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>
-                  {selectedCategory ? 'Edit Category' : 'Add New Category'}
-                </DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Name</Label>
-                  <Input
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Input
-                    id="description"
-                    name="description"
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full bg-blue-500 hover:bg-blue-600 text-white">
-                  {selectedCategory ? 'Update Category' : 'Create Category'}
-                </Button>
-              </form>
-            </DialogContent>
-          </Dialog>
+          <Button asChild className="bg-blue-500 hover:bg-blue-600 text-white">
+            <Link to="/categories/new">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Category
+            </Link>
+          </Button>
         )}
       </div>
 
@@ -219,23 +118,17 @@ export default function Categories() {
                   <TableCell>{category.description}</TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        asChild
-                      >
+                      <Button variant="outline" size="icon" asChild>
                         <Link to={`/categories/${category.id}`}>
                           <Eye className="h-4 w-4" />
                         </Link>
                       </Button>
                       {isAuthenticated && isAdmin && (
                         <>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => handleEdit(category)}
-                          >
-                            <Pencil className="h-4 w-4" />
+                          <Button variant="outline" size="icon" asChild>
+                            <Link to={`/categories/edit/${category.id}`}>
+                              <Pencil className="h-4 w-4" />
+                            </Link>
                           </Button>
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
