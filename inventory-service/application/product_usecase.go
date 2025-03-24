@@ -1,6 +1,7 @@
 package application
 
 import (
+	"context"
 	"inventory-service/domain"
 	"inventory-service/domain/models"
 )
@@ -29,6 +30,6 @@ func (u *ProductUsecase) GetByID(id string) (*models.Product, error) {
 	return u.repo.FindByID(id)
 }
 
-func (u *ProductUsecase) GetAll() ([]*models.Product, error) {
-	return u.repo.FindAll()
+func (u *ProductUsecase) GetAll(ctx context.Context, filter domain.ProductFilter, sort domain.ProductSort, page, limit int) ([]*models.Product, int64, error) {
+	return u.repo.FindAll(ctx, filter, sort, page, limit)
 }

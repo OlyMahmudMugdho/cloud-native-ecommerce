@@ -9,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type ProductRepositoryImpl struct {
@@ -60,21 +61,65 @@ func (r *ProductRepositoryImpl) FindByID(id string) (*models.Product, error) {
 	return &product, err
 }
 
-func (r *ProductRepositoryImpl) FindAll() ([]*models.Product, error) {
+func (r *ProductRepositoryImpl) FindAll(ctx context.Context, filter domain.ProductFilter, sort domain.ProductSort, page, limit int) ([]*models.Product, int64, error) {
 	coll := r.client.Database(r.dbName).Collection(r.collection)
-	cursor, err := coll.Find(context.Background(), bson.M{})
-	if err != nil {
-		return nil, err
+
+	// Build filter query
+	query := bson.M{}
+	if filter.Name != "" {
+		query["name"] = bson.M{"$regex": filter.Name, "$options": "i"} // Case-insensitive partial match
 	}
-	defer cursor.Close(context.Background())
+	if filter.Category != "" {
+		query["category"] = filter.Category
+	}
+	if filter.PriceMin > 0 || filter.PriceMax > 0 {
+		priceFilter := bson.M{}
+		if filter.PriceMin > 0 {
+			priceFilter["$gte"] = filter.PriceMin
+		}
+		if filter.PriceMax > 0 {
+			priceFilter["$lte"] = filter.PriceMax
+		}
+		query["price"] = priceFilter
+	}
+
+	// Count total documents for pagination
+	total, err := coll.CountDocuments(ctx, query)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// Build sort options
+	sortOpt := bson.D{}
+	if sort.Field != "" {
+		sortOpt = append(sortOpt, bson.E{Key: sort.Field, Value: sort.Order})
+	}
+
+	// Build find options for paging and sorting
+	findOptions := options.Find()
+	if limit > 0 {
+		findOptions.SetLimit(int64(limit))
+		findOptions.SetSkip(int64((page - 1) * limit))
+	}
+	if len(sortOpt) > 0 {
+		findOptions.SetSort(sortOpt)
+	}
+
+	// Execute query
+	cursor, err := coll.Find(ctx, query, findOptions)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer cursor.Close(ctx)
 
 	var products []*models.Product
-	for cursor.Next(context.Background()) {
+	for cursor.Next(ctx) {
 		var product models.Product
 		if err := cursor.Decode(&product); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		products = append(products, &product)
 	}
-	return products, nil
+
+	return products, total, nil
 }

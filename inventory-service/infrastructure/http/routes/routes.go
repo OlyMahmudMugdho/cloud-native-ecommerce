@@ -28,7 +28,7 @@ func SetupRouter(mongoClient *db.MongoClient, cfg *config.Config) *mux.Router {
 	userRepo := repository.NewUserRepository(mongoClient, "inventory_db", "users")
 	categoryRepo := repository.NewCategoryRepository(mongoClient, "inventory_db", "categories")
 	userInfoRepo := repository.NewUserInfoRepository(mongoClient, "inventory_db", "users")
-	stockRepo := repository.NewStockRepository(mongoClient, "inventory_db", "products") // New stock repository
+	stockRepo := repository.NewStockRepository(mongoClient, "inventory_db", "products")
 
 	// Initialize services
 	cloudinarySvc := services.NewCloudinaryService(cfg.CloudinaryCloudName, cfg.CloudinaryAPIKey, cfg.CloudinaryAPISecret)
@@ -39,14 +39,14 @@ func SetupRouter(mongoClient *db.MongoClient, cfg *config.Config) *mux.Router {
 	userUsecase := application.NewUserUsecase(userRepo, emailSvc)
 	categoryUsecase := application.NewCategoryUsecase(categoryRepo)
 	userInfoUsecase := application.NewUserInfoUsecase(userInfoRepo)
-	stockUsecase := application.NewStockUsecase(stockRepo) // New stock use case
+	stockUsecase := application.NewStockUsecase(stockRepo)
 
 	// Initialize handlers
 	productHandler := handlers.NewProductHandler(productUsecase, cloudinarySvc)
 	userHandler := handlers.NewUserHandler(userUsecase)
 	categoryHandler := handlers.NewCategoryHandler(categoryUsecase)
 	userInfoHandler := handlers.NewUserInfoHandler(userInfoUsecase)
-	stockHandler := handlers.NewStockHandler(stockUsecase) // New stock handler
+	stockHandler := handlers.NewStockHandler(stockUsecase)
 
 	// Public routes under /inventory/api
 	apiRouter.HandleFunc("/users/register", userHandler.Register).Methods("POST")
@@ -95,7 +95,6 @@ func SetupRouter(mongoClient *db.MongoClient, cfg *config.Config) *mux.Router {
 	r.PathPrefix("/").Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		path := filepath.Join("cmd/dist", r.URL.Path)
 		if _, err := os.Stat(path); os.IsNotExist(err) {
-			// If the file doesn’t exist, serve index.html for SPA routing
 			http.ServeFile(w, r, "cmd/dist/index.html")
 		} else {
 			fs.ServeHTTP(w, r)
