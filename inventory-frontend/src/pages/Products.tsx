@@ -22,6 +22,15 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Pencil, Trash2, Plus, Loader2, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -46,33 +55,79 @@ export default function Products() {
   const [productList, setProductList] = useState<Product[]>([]);
   const [categoryList, setCategoryList] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [limit] = useState(5);
 
-  if (categoryList.length === 0) {
-    console.info();
-  }
+  // Filter and sort state
+  const [filters, setFilters] = useState({
+    name: '',
+    category: 'all', // Default to 'all' instead of ''
+    price_min: '',
+    price_max: '',
+  });
+  const [sort, setSort] = useState<{ field: string; order: 'asc' | 'desc' }>({
+    field: 'name',
+    order: 'asc',
+  });
 
   useEffect(() => {
-    const initializeData = async () => {
+    const fetchData = async () => {
       try {
         setIsLoading(true);
         const [productsResponse, categoriesResponse] = await Promise.all([
-          products.getAll(),
+          products.getAll({
+            name: filters.name || undefined,
+            category: filters.category === 'all' ? undefined : filters.category, // Send undefined for 'all'
+            price_min: filters.price_min ? parseFloat(filters.price_min) : undefined,
+            price_max: filters.price_max ? parseFloat(filters.price_max) : undefined,
+            sort: sort.field,
+            order: sort.order,
+            page: currentPage,
+            limit,
+          }),
           categories.getAll(),
         ]);
-        setProductList(productsResponse.data || []);
+        setProductList(productsResponse.data.products || []);
+        setTotalPages(productsResponse.data.total_pages || 1);
         setCategoryList(categoriesResponse.data || []);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         toast.error('Failed to load data');
         setProductList([]);
         setCategoryList([]);
+        setTotalPages(1);
       } finally {
         setIsLoading(false);
       }
     };
 
-    initializeData(); // Public access, no auth check
-  }, []);
+    fetchData();
+  }, [currentPage, filters, sort]);
+
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFilters((prev) => ({ ...prev, [name]: value }));
+    setCurrentPage(1);
+  };
+
+  const handleCategoryChange = (value: string) => {
+    setFilters((prev) => ({ ...prev, category: value }));
+    setCurrentPage(1);
+  };
+
+  const handleSortChange = (field: string) => {
+    setSort((prev) => ({
+      field,
+      order: prev.field === field && prev.order === 'asc' ? 'desc' : 'asc',
+    }));
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
 
   const handleDelete = async (id: string) => {
     try {
@@ -82,9 +137,18 @@ export default function Products() {
       }
       await products.delete(id);
       toast.success('Product deleted successfully');
-      const response = await products.getAll();
-      setProductList(response.data || []);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const response = await products.getAll({
+        name: filters.name || undefined,
+        category: filters.category === 'all' ? undefined : filters.category,
+        price_min: filters.price_min ? parseFloat(filters.price_min) : undefined,
+        price_max: filters.price_max ? parseFloat(filters.price_max) : undefined,
+        sort: sort.field,
+        order: sort.order,
+        page: currentPage,
+        limit,
+      });
+      setProductList(response.data.products || []);
+      setTotalPages(response.data.total_pages || 1);
     } catch (error: any) {
       if (error.response?.status === 403) {
         toast.error('Only admins can delete products');
@@ -116,6 +180,61 @@ export default function Products() {
         )}
       </div>
 
+      {/* Filters */}
+      <div className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+          <Label htmlFor="nameFilter">Name</Label>
+          <Input
+            id="nameFilter"
+            name="name"
+            value={filters.name}
+            onChange={handleFilterChange}
+            placeholder="Filter by name"
+          />
+        </div>
+        <div>
+          <Label htmlFor="categoryFilter">Category</Label>
+          <Select value={filters.category} onValueChange={handleCategoryChange}>
+            <SelectTrigger id="categoryFilter">
+              <SelectValue placeholder="All Categories" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem> {/* Changed to 'all' */}
+              {categoryList.map((category) => (
+                <SelectItem key={category.id} value={category.name}>
+                  {category.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor="price_min">Min Price</Label>
+          <Input
+            id="price_min"
+            name="price_min"
+            type="number"
+            step="0.01"
+            value={filters.price_min}
+            onChange={handleFilterChange}
+            placeholder="Min price"
+          />
+        </div>
+        <div>
+          <Label htmlFor="price_max">Max Price</Label>
+          <Input
+            id="price_max"
+            name="price_max"
+            type="number"
+            step="0.01"
+            value={filters.price_max}
+            onChange={handleFilterChange}
+            placeholder="Max price"
+          />
+        </div>
+      </div>
+
+      {/* Product Table */}
       {productList.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">
           No products found.{' '}
@@ -127,10 +246,16 @@ export default function Products() {
             <TableHeader>
               <TableRow>
                 <TableHead>Image</TableHead>
-                <TableHead>Name</TableHead>
+                <TableHead onClick={() => handleSortChange('name')} className="cursor-pointer">
+                  Name {sort.field === 'name' && (sort.order === 'asc' ? '↑' : '↓')}
+                </TableHead>
                 <TableHead>Description</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Stock</TableHead>
+                <TableHead onClick={() => handleSortChange('price')} className="cursor-pointer">
+                  Price {sort.field === 'price' && (sort.order === 'asc' ? '↑' : '↓')}
+                </TableHead>
+                <TableHead onClick={() => handleSortChange('stock')} className="cursor-pointer">
+                  Stock {sort.field === 'stock' && (sort.order === 'asc' ? '↑' : '↓')}
+                </TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
@@ -199,6 +324,29 @@ export default function Products() {
               ))}
             </TableBody>
           </Table>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex justify-between items-center mt-6">
+          <Button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            variant="outline"
+          >
+            Previous
+          </Button>
+          <span>
+            Page {currentPage} of {totalPages}
+          </span>
+          <Button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            variant="outline"
+          >
+            Next
+          </Button>
         </div>
       )}
     </div>

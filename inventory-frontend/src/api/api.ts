@@ -35,6 +35,25 @@ api.interceptors.response.use(
   }
 );
 
+interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  category: string;
+  image_url: string;
+}
+
+
+interface PaginatedResponse<T> {
+  products: T[];
+  total: number;
+  page: number;
+  limit: number;
+  total_pages: number;
+}
+
 export const auth = {
   register: (email: string, password: string) =>
     api.post('/users/register', { email, password }),
@@ -48,8 +67,17 @@ export const auth = {
 };
 
 export const products = {
-  getAll: () => api.get('/products'),
-  getOne: (id: string) => api.get(`/products/${id}`),
+  getAll: (params: {
+    name?: string;
+    category?: string;
+    price_min?: number;
+    price_max?: number;
+    sort?: string;
+    order?: 'asc' | 'desc';
+    page?: number;
+    limit?: number;
+  } = {}) => api.get<PaginatedResponse<Product>>('/products', { params }),
+  getOne: (id: string) => api.get<Product>(`/products/${id}`),
   create: (data: FormData) =>
     api.post('/products', data, {
       headers: {
