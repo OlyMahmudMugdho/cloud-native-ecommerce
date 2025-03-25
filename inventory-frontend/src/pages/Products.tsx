@@ -59,13 +59,20 @@ export default function Products() {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(5);
 
-  // Filter and sort state
-  const [filters, setFilters] = useState({
+  // Initial filter state
+  const initialFilters = {
     name: '',
-    category: 'all', // Default to 'all' instead of ''
+    category: 'all',
     price_min: '',
     price_max: '',
-  });
+  };
+
+  // Filter input state (temporary, not applied yet)
+  const [inputFilters, setInputFilters] = useState(initialFilters);
+
+  // Applied filters (used for API call)
+  const [appliedFilters, setAppliedFilters] = useState(initialFilters);
+
   const [sort, setSort] = useState<{ field: string; order: 'asc' | 'desc' }>({
     field: 'name',
     order: 'asc',
@@ -77,10 +84,10 @@ export default function Products() {
         setIsLoading(true);
         const [productsResponse, categoriesResponse] = await Promise.all([
           products.getAll({
-            name: filters.name || undefined,
-            category: filters.category === 'all' ? undefined : filters.category, // Send undefined for 'all'
-            price_min: filters.price_min ? parseFloat(filters.price_min) : undefined,
-            price_max: filters.price_max ? parseFloat(filters.price_max) : undefined,
+            name: appliedFilters.name || undefined,
+            category: appliedFilters.category === 'all' ? undefined : appliedFilters.category,
+            price_min: appliedFilters.price_min ? parseFloat(appliedFilters.price_min) : undefined,
+            price_max: appliedFilters.price_max ? parseFloat(appliedFilters.price_max) : undefined,
             sort: sort.field,
             order: sort.order,
             page: currentPage,
@@ -102,17 +109,26 @@ export default function Products() {
     };
 
     fetchData();
-  }, [currentPage, filters, sort]);
+  }, [currentPage, appliedFilters, sort]);
 
-  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFilters((prev) => ({ ...prev, [name]: value }));
-    setCurrentPage(1);
+    setInputFilters((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleCategoryChange = (value: string) => {
-    setFilters((prev) => ({ ...prev, category: value }));
-    setCurrentPage(1);
+    setInputFilters((prev) => ({ ...prev, category: value }));
+  };
+
+  const handleApplyFilters = () => {
+    setAppliedFilters({ ...inputFilters });
+    setCurrentPage(1); // Reset to first page when applying filters
+  };
+
+  const handleResetFilters = () => {
+    setInputFilters(initialFilters);
+    setAppliedFilters(initialFilters);
+    setCurrentPage(1); // Reset to first page when resetting filters
   };
 
   const handleSortChange = (field: string) => {
@@ -138,10 +154,10 @@ export default function Products() {
       await products.delete(id);
       toast.success('Product deleted successfully');
       const response = await products.getAll({
-        name: filters.name || undefined,
-        category: filters.category === 'all' ? undefined : filters.category,
-        price_min: filters.price_min ? parseFloat(filters.price_min) : undefined,
-        price_max: filters.price_max ? parseFloat(filters.price_max) : undefined,
+        name: appliedFilters.name || undefined,
+        category: appliedFilters.category === 'all' ? undefined : appliedFilters.category,
+        price_min: appliedFilters.price_min ? parseFloat(appliedFilters.price_min) : undefined,
+        price_max: appliedFilters.price_max ? parseFloat(appliedFilters.price_max) : undefined,
         sort: sort.field,
         order: sort.order,
         page: currentPage,
@@ -181,25 +197,25 @@ export default function Products() {
       </div>
 
       {/* Filters */}
-      <div className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="mb-6 grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
         <div>
           <Label htmlFor="nameFilter">Name</Label>
           <Input
             id="nameFilter"
             name="name"
-            value={filters.name}
-            onChange={handleFilterChange}
+            value={inputFilters.name}
+            onChange={handleInputFilterChange}
             placeholder="Filter by name"
           />
         </div>
         <div>
           <Label htmlFor="categoryFilter">Category</Label>
-          <Select value={filters.category} onValueChange={handleCategoryChange}>
+          <Select value={inputFilters.category} onValueChange={handleCategoryChange}>
             <SelectTrigger id="categoryFilter">
               <SelectValue placeholder="All Categories" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem> {/* Changed to 'all' */}
+              <SelectItem value="all">All Categories</SelectItem>
               {categoryList.map((category) => (
                 <SelectItem key={category.id} value={category.name}>
                   {category.name}
@@ -215,8 +231,8 @@ export default function Products() {
             name="price_min"
             type="number"
             step="0.01"
-            value={filters.price_min}
-            onChange={handleFilterChange}
+            value={inputFilters.price_min}
+            onChange={handleInputFilterChange}
             placeholder="Min price"
           />
         </div>
@@ -227,10 +243,18 @@ export default function Products() {
             name="price_max"
             type="number"
             step="0.01"
-            value={filters.price_max}
-            onChange={handleFilterChange}
+            value={inputFilters.price_max}
+            onChange={handleInputFilterChange}
             placeholder="Max price"
           />
+        </div>
+        <div className="flex space-x-2">
+          <Button onClick={handleApplyFilters} >
+            Apply Filters
+          </Button>
+          <Button onClick={handleResetFilters} variant="outline">
+            Reset Filters
+          </Button>
         </div>
       </div>
 
