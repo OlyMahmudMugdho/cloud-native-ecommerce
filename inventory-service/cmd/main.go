@@ -9,6 +9,7 @@ import (
 	"inventory-service/infrastructure/db"
 	"inventory-service/infrastructure/http/routes"
 	"inventory-service/infrastructure/messaging"
+	"inventory-service/infrastructure/services"
 	"log"
 	"net/http"
 	"net/smtp"
@@ -44,10 +45,15 @@ func main() {
 	// Start Kafka Consumer in a goroutine
 	go startKafkaEmailConsumer(cfg)
 
+	// Register with Eureka Server
+	services.RegisterWithEureka()
+	go services.SendHeartbeat()
+
 	// Setup and start HTTP server using routes.SetupRouter
 	router := routes.SetupRouter(mongoClient, cfg, kafkaProducer, redisClient) // Pass redisClient
 	log.Printf("Server starting on port %s", cfg.Port)
 	log.Fatal(http.ListenAndServe(":"+cfg.Port, router))
+
 }
 
 // Kafka Email Consumer Logic
