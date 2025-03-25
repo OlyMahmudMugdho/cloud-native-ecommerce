@@ -1,45 +1,47 @@
 package services
 
 import (
+	"context"
 	"fmt"
 	"inventory-service/infrastructure/config"
-	"net/smtp"
+	"inventory-service/infrastructure/messaging"
 )
 
-// EmailService defines the interface for email operations
 type EmailService interface {
 	SendVerificationEmail(to, token string) error
 	SendPasswordResetEmail(to, token string) error
 }
 
-type emailService struct { // Renamed to avoid conflict with interface
-	cfg *config.Config
+type emailService struct {
+	kafkaProducer *messaging.KafkaProducer
+	cfg           *config.Config
 }
 
-func NewEmailService(cfg *config.Config) EmailService { // Return interface type
-	return &emailService{cfg: cfg}
+func NewEmailService(cfg *config.Config, kafkaProducer *messaging.KafkaProducer) EmailService {
+	return &emailService{
+		kafkaProducer: kafkaProducer,
+		cfg:           cfg,
+	}
 }
 
 func (s *emailService) SendVerificationEmail(to, token string) error {
-	auth := smtp.PlainAuth("", s.cfg.SMTPUsername, s.cfg.SMTPPassword, s.cfg.SMTPHost)
-	msg := []byte(fmt.Sprintf("To: %s\r\n"+
-		"Subject: Verify Your Email\r\n"+
-		"\r\n"+
-		"Click the link to verify your email: http://localhost:%s/users/verify/%s\r\n",
-		to, s.cfg.Port, token))
-
-	addr := fmt.Sprintf("%s:%d", s.cfg.SMTPHost, s.cfg.SMTPPort)
-	return smtp.SendMail(addr, auth, s.cfg.EmailFrom, []string{to}, msg)
+	msg := messaging.EmailMessage{
+		Type:    "verification",
+		To:      to,
+		Token:   token,
+		Subject: "Verify Your Email",
+		Body:    fmt.Sprintf("Click the link to verify your email: http://localhost:%s/inventory/api/users/verify/%s", s.cfg.Port, token),
+	}
+	return s.kafkaProducer.SendEmailMessage(context.Background(), msg)
 }
 
 func (s *emailService) SendPasswordResetEmail(to, token string) error {
-	auth := smtp.PlainAuth("", s.cfg.SMTPUsername, s.cfg.SMTPPassword, s.cfg.SMTPHost)
-	msg := []byte(fmt.Sprintf("To: %s\r\n"+
-		"Subject: Reset Your Password\r\n"+
-		"\r\n"+
-		"Click the link to reset your password: http://localhost:%s/users/password/reset/%s\r\n",
-		to, s.cfg.Port, token))
-
-	addr := fmt.Sprintf("%s:%d", s.cfg.SMTPHost, s.cfg.SMTPPort)
-	return smtp.SendMail(addr, auth, s.cfg.EmailFrom, []string{to}, msg)
+	msg := messaging.EmailMessage{
+		Type:    "reset_password",
+		To:      to,
+		Token:   token,
+		Subject: "Reset Your Password",
+		Body:    fmt.Sprintf("Click the link to reset your password: http://localhost:%s/inventory/api/users/password/reset/%s", s.cfg.Port, token),
+	}
+	return s.kafkaProducer.SendEmailMessage(context.Background(), msg)
 }

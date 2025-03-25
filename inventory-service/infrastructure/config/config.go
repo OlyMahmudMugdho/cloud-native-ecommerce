@@ -18,6 +18,9 @@ type Config struct {
 	SMTPUsername        string `yaml:"smtp_username"`
 	SMTPPassword        string `yaml:"smtp_password"`
 	ServiceAPIKey       string `yaml:"service_api_key"`
+	RedisURL            string `yaml:"redis_url"`
+	KafkaBroker         string `yaml:"kafka_broker"`
+	KafkaEmailTopic     string `yaml:"kafka_email_topic"`
 }
 
 func LoadConfig(filename string) (*Config, error) {
