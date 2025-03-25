@@ -249,7 +249,7 @@ export default function Products() {
           />
         </div>
         <div className="flex space-x-2">
-          <Button onClick={handleApplyFilters} >
+          <Button onClick={handleApplyFilters} variant="outline">
             Apply Filters
           </Button>
           <Button onClick={handleResetFilters} variant="outline">
