@@ -47,7 +47,7 @@ public class CartServiceImpl implements CartService {
             // Get existing cart or create a new one
             Cart cart = cartRepository.findByUserId(userId)
                     .orElse(new Cart());
-            cart.setUserId(userId);
+            cart.setUserId(userId); // Always use the userId from JWT
 
             // Parse existing items from cart (if any)
             List<CartItemDTO> existingItems = new ArrayList<>();
@@ -95,7 +95,7 @@ public class CartServiceImpl implements CartService {
             // Prepare response DTO
             CartDTO responseDTO = new CartDTO();
             responseDTO.setId(cart.getId());
-            responseDTO.setUserId(userId);
+            responseDTO.setUserId(userId); // Use JWT userId in response
             responseDTO.setItems(existingItems);
             return responseDTO;
         } catch (Exception e) {
@@ -147,10 +147,13 @@ public class CartServiceImpl implements CartService {
             // If inventory checks pass, proceed with updating cart
             Cart cart = cartRepository.findByUserId(userId)
                     .orElseThrow(() -> new ResourceNotFoundException("Cart not found for user: " + userId));
+            cart.setUserId(userId); // Ensure userId from JWT is used
             cart.setItemsJson(objectMapper.writeValueAsString(cartDTO.getItems()));
             cartRepository.save(cart);
+
+            // Prepare response DTO
             cartDTO.setId(cart.getId());
-            cartDTO.setUserId(userId);
+            cartDTO.setUserId(userId); // Use JWT userId in response
             return cartDTO;
         } catch (Exception e) {
             throw new RuntimeException("Failed to update cart: " + e.getMessage(), e);
