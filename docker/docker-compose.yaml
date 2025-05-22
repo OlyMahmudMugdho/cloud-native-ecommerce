@@ -23,6 +23,7 @@ services:
       until pg_isready -U postgres; do sleep 3; done &&
       psql -U postgres -d postgres -c 'CREATE DATABASE order_db;' || true &&
       psql -U postgres -d postgres -c 'CREATE DATABASE keycloak;' || true &&
+      psql -U postgres -d postgres -c 'CREATE DATABASE cart_db;' || true &&
       echo done > /initialised.txt &&
       wait"
     ]
@@ -38,6 +39,13 @@ services:
       - mongodb_data:/data/db
     networks:
       - app-network
+
+  redis:
+    image: redis/redis-stack-server:latest
+    container_name: redis
+    ports:
+      - 6379:6379
+
 
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
