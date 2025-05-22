@@ -1,0 +1,43 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: order-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/order_db
+    username: postgres
+    password: mysecretpassword
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+
+keycloak:
+  auth-server-url: http://localhost:8080/auth
+  realm: ecommerce-realm
+  resource: order-service
+  public-client: false
+  bearer-only: true
+  principal-attribute: preferred_username
+
+stripe:
+  secret-key: sk_test_51M6y8xKz... # Replace with your Stripe secret key
+  webhook-secret: whsec_... # Replace with your Stripe webhook secret
+
+inventory-service:
+  api-key: your-api-key-here
