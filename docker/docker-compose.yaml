@@ -5,12 +5,28 @@ services:
     restart: always
     environment:
       POSTGRES_PASSWORD: mysecretpassword
+      
     ports:
       - 5432:5432
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "cat /initialised.txt && pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    entrypoint: [ "/bin/bash", "-c","
+      docker-entrypoint.sh postgres &
+      rm -f /initialised.txt || true &&
+      until pg_isready -U postgres; do sleep 3; done &&
+      psql -U postgres -d postgres -c 'CREATE DATABASE order_db;' || true &&
+      psql -U postgres -d postgres -c 'CREATE DATABASE keycloak;' || true &&
+      echo done > /initialised.txt &&
+      wait"
+    ]
+
 
   mongodb:
     image: mongodb/mongodb-community-server:latest
@@ -79,8 +95,12 @@ services:
       - start-dev
     ports:
       - "8088:8080"
+    restart: unless-stopped
     networks:
       - app-network
+    depends_on:
+      - postgres
+
 
   zipkin:
     image: openzipkin/zipkin
