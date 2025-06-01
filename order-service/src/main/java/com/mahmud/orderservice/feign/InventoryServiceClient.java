@@ -16,12 +16,12 @@ public interface InventoryServiceClient {
     @CircuitBreaker(name = "inventoryService", fallbackMethod = "getProductsFallback")
     List<ProductDTO> getAllProducts();
 
-    @GetMapping("/products/{id}")
+    @GetMapping("/inventory/api/products/{id}")
     @CircuitBreaker(name = "inventoryService", fallbackMethod = "getProductFallback")
     ProductDTO getProductById(@PathVariable("id") String id);
 
-    @PostMapping("/stocks/bulk-update")
-    void updateStock(@RequestBody List<StockUpdateDTO> updates, @RequestHeader("X-API-Key") String apiKey);
+    @PostMapping("/inventory/api/stocks/bulk-update")
+    void updateStock(@RequestBody StockUpdateDTO updates, @RequestHeader("X-API-Key") String apiKey);
 
     default List<ProductDTO> getProductsFallback(Throwable t) {
         return List.of();

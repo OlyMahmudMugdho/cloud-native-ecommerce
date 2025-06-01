@@ -1,7 +1,7 @@
 .PHONY: build run test
 
 build:
-	go build -o inventory-service cmd/main.go
+	go build -o bin/inventory-service cmd/main.go
 
 run:
 	go run cmd/main.go

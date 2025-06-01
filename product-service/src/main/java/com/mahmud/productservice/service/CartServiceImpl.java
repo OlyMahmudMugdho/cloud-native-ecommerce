@@ -105,22 +105,27 @@ public class CartServiceImpl implements CartService {
         }
     }
 
+    
+    
     @Override
-    @Transactional(readOnly = true)
-    public CartDTO getCart(String userId) {
-        Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Cart not found for user: " + userId));
-        try {
-            CartDTO cartDTO = new CartDTO();
-            cartDTO.setId(cart.getId());
-            cartDTO.setUserId(cart.getUserId());
-            cartDTO.setItems(objectMapper.readValue(cart.getItemsJson(),
-                    objectMapper.getTypeFactory().constructCollectionType(List.class, CartItemDTO.class)));
-            return cartDTO;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to parse cart items: " + e.getMessage(), e);
-        }
+@Transactional(readOnly = true)
+public CartDTO getCart(String userId) {
+    System.out.println("Fetching cart for userId: " + userId);
+    Cart cart = cartRepository.findByUserId(userId)
+            .orElseThrow(() -> new ResourceNotFoundException("Cart not found for user: " + userId));
+    try {
+        CartDTO cartDTO = new CartDTO();
+        cartDTO.setId(cart.getId());
+        cartDTO.setUserId(cart.getUserId());
+        cartDTO.setItems(objectMapper.readValue(cart.getItemsJson(), objectMapper.getTypeFactory().constructCollectionType(List.class, CartItemDTO.class)));
+        System.out.println("Cart found: " + cartDTO);
+        return cartDTO;
+    } catch (Exception e) {
+        throw new RuntimeException("Failed to parse cart items: " + e.getMessage(), e);
     }
+}
+
+
 
     @Override
     @Transactional

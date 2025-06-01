@@ -5,7 +5,7 @@ import (
 	"inventory-service/application"
 	"inventory-service/infrastructure/dto"
 	"net/http"
-
+	"fmt"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -27,6 +27,9 @@ func (h *StockHandler) BulkUpdateStock(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
+
+	fmt.Println(req)
+
 
 	if err := h.validator.Struct(req); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

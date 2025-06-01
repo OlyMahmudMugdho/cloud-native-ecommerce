@@ -6,15 +6,17 @@ import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 
-@FeignClient(name = "product-service", configuration = FeignConfig.class)
+@FeignClient(name = "PRODUCT-SERVICE", configuration = FeignConfig.class)
 public interface ProductServiceClient {
 
-    @GetMapping("/products/cart")
+    @GetMapping("/api/products/cart/{userId}")
     @CircuitBreaker(name = "productService", fallbackMethod = "getCartFallback")
-    CartDTO getCart(@PathVariable("userId") String userId);
+    CartDTO getCart(@PathVariable("userId") String userId, @RequestHeader("X-API-Key") String apiKey);
 
-    default CartDTO getCartFallback(String userId, Throwable t) {
+    default CartDTO getCartFallback(String apiKey, Throwable t) {
+        System.err.println("Fallback triggered for getCart: " + t.getMessage());
         return null;
     }
 }
