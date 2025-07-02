@@ -63,7 +63,7 @@ services:
       - app-network
 
   kafka:
-    image: confluentinc/cp-kafka:latest
+    image: confluentinc/cp-kafka:7.3.13
     hostname: kafka
     container_name: kafka
     depends_on:
