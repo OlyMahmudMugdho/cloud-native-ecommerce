@@ -171,6 +171,9 @@ public void handleCheckoutSessionCompleted(Session session) {
             order.setStatus("PAID");
             orderRepository.save(order);
             System.out.println("Order status updated to PAID for order: " + order.getId());
+
+
+            productServiceClient.deleteCart(order.getUserId(), productServiceApiKey);
         } catch (Exception e) {
             System.err.println("Failed to process checkout session: " + e.getMessage());
             e.printStackTrace();
