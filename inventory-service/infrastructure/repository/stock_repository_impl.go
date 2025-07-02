@@ -2,7 +2,9 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"inventory-service/domain"
+	"inventory-service/infrastructure/cache"
 	"inventory-service/infrastructure/db"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -12,11 +14,13 @@ import (
 
 type StockRepositoryImpl struct {
 	collection *mongo.Collection
+	redis      *cache.RedisClient
 }
 
-func NewStockRepository(client *db.MongoClient, dbName, collectionName string) domain.StockRepository {
+func NewStockRepository(client *db.MongoClient, dbName, collectionName string, redis *cache.RedisClient) domain.StockRepository {
 	return &StockRepositoryImpl{
 		collection: client.Client.Database(dbName).Collection(collectionName),
+		redis:      redis,
 	}
 }
 
@@ -39,12 +43,17 @@ func (r *StockRepositoryImpl) BulkUpdateStock(ctx context.Context, updates map[s
 			SetFilter(bson.M{"_id": objID}).
 			SetUpdate(bson.M{"$inc": bson.M{"stock": stockChange}})
 		operations = append(operations, operation)
+		r.redis.DeleteCache(ctx, fmt.Sprintf("product:%s", productID))
 	}
+
+	r.redis.DeleteCache(ctx, "products:all")
 
 	if len(operations) == 0 {
 		return nil
 	}
 
 	_, err := r.collection.BulkWrite(ctx, operations)
+
+	r.redis.DeleteCache(ctx, "products:all")
 	return err
 }
