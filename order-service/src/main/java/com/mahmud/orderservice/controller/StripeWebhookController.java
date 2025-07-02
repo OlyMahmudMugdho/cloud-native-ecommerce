@@ -70,6 +70,9 @@ public class StripeWebhookController {
 
                     orderService.handleCheckoutSessionCompleted(session);
                     break;
+                case "checkout.session.expired":
+                    System.out.println("Checkout session expired");
+                    break;
                 default:
                     System.out.println("Unhandled event type: " + event.getType());
             }

@@ -5,7 +5,7 @@ spring:
   application:
     name: order-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/order_db
+    url: ${ORDER_DB_URI:jdbc:postgresql://localhost:5432/order_db}
     username: postgres
     password: mysecretpassword
     driver-class-name: org.postgresql.Driver
@@ -49,4 +49,4 @@ stripe:
   webhookSecret: ${STRIPE_WEBHOOK_SECRET}
 
 inventory-service:
-  api-key: secret-api-key
+  api-key: ${API_KEY}
