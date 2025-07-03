@@ -6,8 +6,8 @@ spring:
     name: order-service
   datasource:
     url: ${ORDER_DB_URI:jdbc:postgresql://localhost:5432/order_db}
-    username: postgres
-    password: mysecretpassword
+    username: ${ORDER_DB_USERNAME:postgres}
+    password: ${ORDER_DB_PASSWORD:mysecretpassword}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
