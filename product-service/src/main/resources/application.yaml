@@ -5,9 +5,9 @@ spring:
   application:
     name: product-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/cart_db
-    username: postgres
-    password: mysecretpassword
+    url: ${CART_DB_URI:jdbc:postgresql://localhost:5432/cart_db}
+    username: ${CART_DB_USER:postgres}
+    password: ${CART_DB_PASSWORD:mysecretpassword}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -15,15 +15,15 @@ spring:
     show-sql: true
   data:
     redis:
-      host: localhost
-      port: 6379
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
 
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8088/realms/cloud-native-ecommerce
-          jwk-set-uri: http://localhost:8088/realms/cloud-native-ecommerce/protocol/openid-connect/certs
+          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8088/realms/cloud-native-ecommerce}
+          jwk-set-uri: ${JWT_SET_URI:http://localhost:8088/realms/cloud-native-ecommerce/protocol/openid-connect/certs}
 
 eureka:
   client:
