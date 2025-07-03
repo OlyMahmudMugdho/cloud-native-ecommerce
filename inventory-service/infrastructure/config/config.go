@@ -2,38 +2,51 @@ package config
 
 import (
 	"os"
-
-	"gopkg.in/yaml.v3"
+	"strconv"
 )
 
 type Config struct {
-	Port                string `yaml:"port"`
-	MongoURL            string `yaml:"mongo_url"`
-	CloudinaryCloudName string `yaml:"cloudinary_cloud_name"`
-	CloudinaryAPIKey    string `yaml:"cloudinary_api_key"`
-	CloudinaryAPISecret string `yaml:"cloudinary_api_secret"`
-	EmailFrom           string `yaml:"email_from"`
-	SMTPHost            string `yaml:"smtp_host"`
-	SMTPPort            int    `yaml:"smtp_port"`
-	SMTPUsername        string `yaml:"smtp_username"`
-	SMTPPassword        string `yaml:"smtp_password"`
-	ServiceAPIKey       string `yaml:"service_api_key"`
-	RedisURL            string `yaml:"redis_url"`
-	KafkaBroker         string `yaml:"kafka_broker"`
-	KafkaEmailTopic     string `yaml:"kafka_email_topic"`
+	Port                string
+	MongoURL            string
+	CloudinaryCloudName string
+	CloudinaryAPIKey    string
+	CloudinaryAPISecret string
+	EmailFrom           string
+	SMTPHost            string
+	SMTPPort            int
+	SMTPUsername        string
+	SMTPPassword        string
+	ServiceAPIKey       string
+	RedisURL            string
+	KafkaBroker         string
+	KafkaEmailTopic     string
 }
 
-func LoadConfig(filename string) (*Config, error) {
-	data, err := os.ReadFile(filename)
-	if err != nil {
-		return nil, err
+func LoadConfig() (*Config, error) {
+	cfg := &Config{
+		Port:                os.Getenv("PORT"),
+		MongoURL:            os.Getenv("MONGO_URL"),
+		CloudinaryCloudName: os.Getenv("CLOUDINARY_CLOUD_NAME"),
+		CloudinaryAPIKey:    os.Getenv("CLOUDINARY_API_KEY"),
+		CloudinaryAPISecret: os.Getenv("CLOUDINARY_API_SECRET"),
+		EmailFrom:           os.Getenv("EMAIL_FROM"),
+		SMTPHost:            os.Getenv("SMTP_HOST"),
+		SMTPUsername:        os.Getenv("SMTP_USERNAME"),
+		SMTPPassword:        os.Getenv("SMTP_PASSWORD"),
+		ServiceAPIKey:       os.Getenv("SERVICE_API_KEY"),
+		RedisURL:            os.Getenv("REDIS_URL"),
+		KafkaBroker:         os.Getenv("KAFKA_BROKER"),
+		KafkaEmailTopic:     os.Getenv("KAFKA_EMAIL_TOPIC"),
 	}
 
-	var cfg Config
-	err = yaml.Unmarshal(data, &cfg)
-	if err != nil {
-		return nil, err
+	// Parse SMTP_PORT from string to int
+	if smtpPortStr := os.Getenv("SMTP_PORT"); smtpPortStr != "" {
+		if port, err := strconv.Atoi(smtpPortStr); err == nil {
+			cfg.SMTPPort = port
+		} else {
+			return nil, err
+		}
 	}
 
-	return &cfg, nil
+	return cfg, nil
 }

@@ -19,10 +19,12 @@ import (
 
 func main() {
 	// Load configuration
-	cfg, err := config.LoadConfig("config.yaml")
+	cfg, err := config.LoadConfig()
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
 	}
+	
+	fmt.Println(cfg.MongoURL)
 
 	// Initialize MongoDB
 	mongoClient, err := db.NewMongoClient(cfg.MongoURL)
