@@ -35,7 +35,7 @@ eureka:
     prefer-ip-address: true
 
 inventory-service:
-  api-key: secret-api-key
+  api-key: ${API_KEY}
 
 resilience4j:
   circuitbreaker:
