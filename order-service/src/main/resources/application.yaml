@@ -15,15 +15,15 @@ spring:
     show-sql: true
   data:
     redis:
-      host: localhost
-      port: 6379
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
 
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8088/realms/cloud-native-ecommerce
-          jwk-set-uri: http://localhost:8088/realms/cloud-native-ecommerce/protocol/openid-connect/certs
+          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8088/realms/cloud-native-ecommerce}
+          jwk-set-uri: ${JWT_SET_URI:http://localhost:8088/realms/cloud-native-ecommerce/protocol/openid-connect/certs}
 
 
 eureka:
