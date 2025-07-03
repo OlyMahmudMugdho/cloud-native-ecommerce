@@ -1,0 +1,206 @@
+services:
+  postgres:
+    image: postgres
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: mysecretpassword
+
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "cat /initialised.txt && pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    entrypoint: [ "/bin/bash", "-c","
+      docker-entrypoint.sh postgres &
+      rm -f /initialised.txt || true &&
+      until pg_isready -U postgres; do sleep 3; done &&
+      psql -U postgres -d postgres -c 'CREATE DATABASE order_db;' || true &&
+      psql -U postgres -d postgres -c 'CREATE DATABASE keycloak;' || true &&
+      psql -U postgres -d postgres -c 'CREATE DATABASE cart_db;' || true &&
+      echo done > /initialised.txt &&
+      wait"
+    ]
+
+
+  mongodb:
+    image: mongodb/mongodb-community-server:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    restart: unless-stopped
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - app-network
+
+  redis:
+    image: redis/redis-stack-server:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    hostname: zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+      - zookeeper_data:/var/lib/zookeeper/data
+      - zookeeper_logs:/var/lib/zookeeper/log
+    networks:
+      - app-network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.3.13
+    hostname: kafka
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    restart: always
+    networks:
+      - app-network
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: keycloak
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HOSTNAME_STRICT_BACKCHANNEL: true
+      KC_HTTP_RELATIVE_PATH: /
+      KC_HTTP_ENABLED: true
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: postgres
+      KC_DB_PASSWORD: mysecretpassword
+    command:
+      - start-dev
+    ports:
+      - "8088:8080"
+    restart: unless-stopped
+    networks:
+      - app-network
+    depends_on:
+      - postgres
+
+
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    ports:
+      - "9411:9411"
+    networks:
+      - app-network
+
+  inventory-service:
+    image: olymahmudmugdho/cne-inventory-service
+    container_name: inventory-service
+    restart: "always"
+    ports:
+      - "8080:8080"
+    environment:
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - SMTP_USERNAME=${SPRING_MAIL_USERNAME}
+      - SMTP_PASSWORD=${SPRING_MAIL_PASSWORD}
+      - SMTP_PORT=${MAIL_PORT}
+      - SMTP_HOST=${MAIL_HOST}
+      - SERVICE_API_KEY=${SERVICE_APIKEY}
+      - REDIS_URL=redis://redis:6379
+      - KAFKA_BROKER=kafka:29092
+      - KAFKA_EMAIL_TOPIC=email_notifications
+      - MONGO_URL=mongodb://mongodb:27017
+      - PORT=8080
+      - EMAIL_FROM=mugdhodzs38@gmail.com
+    networks:
+      - app-network
+    depends_on:
+      - kafka
+      - mongodb
+      - redis
+
+
+  product-service:
+    image: olymahmudmugdho/cne-product-service
+    container_name: product-service
+    ports:
+      - "8081:8081"
+    environment:
+      - CART_DB_URI=jdbc:postgresql://postgres:5432/cart_db
+      - CART_DB_USER=postgres
+      - CART_DB_PASSWORD=mysecretpassword
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_ISSUER_URI=http://keycloak:8080/realms/cloud-native-ecommerce
+      - JWT_SET_URI=http://keycloak:8080/realms/cloud-native-ecommerce/protocol/openid-connect/certs
+      - API_KEY=secret-api-key
+    networks:
+      - app-network
+    depends_on:
+      - kafka
+      - redis
+      - keycloak
+      - postgres
+
+  order-service:
+    image: olymahmudmugdho/cne-order-service
+    container_name: order-service
+    ports:
+      - "8082:8082"
+    environment:
+      - ORDER_DB_URI=jdbc:postgresql://postgres:5432/order_db
+      - ORDER_DB_USERNAME=postgres
+      - ORDER_DB_PASSWORD=mysecretpassword
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_ISSUER_URI=http://keycloak:8080/realms/cloud-native-ecommerce
+      - JWT_SET_URI=http://keycloak:8080/realms/cloud-native-ecommerce/protocol/openid-connect/certs
+      - API_KEY=secret-api-key
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+    depends_on:
+      - redis
+      - keycloak
+      - postgres
+    networks:
+      - app-network
+
+
+volumes:
+  postgres_data:
+  mongodb_data:
+  zookeeper_data:
+  zookeeper_logs:
+  kafka_data:
+
+networks:
+  app-network:
+    driver: bridge
