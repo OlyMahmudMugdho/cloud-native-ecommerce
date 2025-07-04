@@ -113,3 +113,13 @@ variable "postgres_username" {
 variable "postgres_password" {
   type = string
 }
+
+variable "workload_network_router_name" {
+  type = string
+  default = "workload-network-router"
+}
+
+variable "workload_nat_name" {
+  type = string
+  default = "workload-nat"
+}
