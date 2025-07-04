@@ -49,7 +49,7 @@ variable "redis_kafka_rule_ranges" {
 
 variable "redis_kafka_vm_name" {
   type    = string
-  default = "redis-kafka-vm"
+  default = "redis-kafka-server"
 }
 
 
@@ -71,7 +71,7 @@ variable "mongodb_keycloak_machine_type" {
 
 variable "mongodb_keycloak_vm_name" {
   type    = string
-  default = "e2-standard-4"
+  default = "mongodb-keycloak-server"
 }
 
 variable "mongodb_keycloak_tags" {
