@@ -1,0 +1,9 @@
+- name: Login to GCP
+  hosts: local
+  connection: local
+  tasks:
+    - name: make executable
+      shell: chmod +x ./../scripts/gcp_login.sh
+
+    - name: login
+      shell: ./../scripts/gcp_login.sh

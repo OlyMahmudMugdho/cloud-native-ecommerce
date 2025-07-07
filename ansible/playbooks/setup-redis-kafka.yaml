@@ -1,0 +1,12 @@
+- name: Setup redis-kafka-server
+  hosts: local
+  connection: local
+  tasks:
+    - name: make executable
+      shell: chmod +x ./../scripts/install_redis_kafka.sh
+
+    - name: install docker
+      shell: ./../scripts/install_redis_kafka.sh
+
+    - name: deploy mongodb and keycloak
+      shell: ./../scripts/deploy_redis_kafka.sh

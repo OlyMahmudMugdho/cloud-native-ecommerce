@@ -1,0 +1,12 @@
+- name: Setup mongodb-keycloak-server
+  hosts: local
+  connection: local
+  tasks:
+    - name: make executable
+      shell: chmod +x ./../scripts/install_mongodb.sh
+
+    - name: install docker
+      shell: ./../scripts/install_mongodb.sh
+    
+    - name: deploy mongodb and keycloak
+      shell: ./../scripts/deploy_mongodb_keycloak.sh
