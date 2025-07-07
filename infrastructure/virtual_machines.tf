@@ -43,6 +43,10 @@ resource "google_compute_instance" "mongodb_keycloak_vm" {
   network_interface {
     network    = google_compute_network.workloads_network.id
     subnetwork = google_compute_subnetwork.server_workloads_subnet.id
+
+    access_config {
+      // Ephemeral public IP
+    }
   }
 
 }
