@@ -7,6 +7,3 @@
 
     - name: install docker
       shell: ./../scripts/install_mongodb.sh
-    
-    - name: deploy mongodb and keycloak
-      shell: ./../scripts/deploy_mongodb_keycloak.sh
