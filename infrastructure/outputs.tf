@@ -11,5 +11,13 @@ output "mongodb_keycloak_vm_ip" {
 }
 
 output "mongodb_keycloak_vm_external_ip" {
-   value = google_compute_instance.mongodb_keycloak_vm.network_interface[0].access_config[0].nat_ip
+  value = google_compute_instance.mongodb_keycloak_vm.network_interface[0].access_config[0].nat_ip
+}
+
+output "gcp_project_id" {
+  value = var.project
+}
+
+output "gcp_zone" {
+  value = var.zone
 }

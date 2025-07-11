@@ -5,5 +5,5 @@
     - name: Deploy mongodb and keycloak
       shell: chmod +x ./../scripts/deploy_mongodb_keycloak.sh
 
-    - name: install docker
+    - name: Deploy mongodb and keycloak
       shell: ./../scripts/deploy_mongodb_keycloak.sh

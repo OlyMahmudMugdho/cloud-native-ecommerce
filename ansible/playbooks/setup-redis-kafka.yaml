@@ -8,5 +8,5 @@
     - name: install docker
       shell: ./../scripts/install_redis_kafka.sh
 
-    - name: deploy mongodb and keycloak
+    - name: deploy redis and kafka
       shell: ./../scripts/deploy_redis_kafka.sh

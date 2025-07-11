@@ -1,0 +1,1 @@
+ansible-playbook -i inventory/inventory.ini playbooks/fetch-k8s-credentials.yaml

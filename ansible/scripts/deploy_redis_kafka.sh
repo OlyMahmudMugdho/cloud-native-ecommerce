@@ -1,3 +1,4 @@
+GCP_ZONE=$(grep 'zone' ../../infrastructure/terraform.tfvars | awk -F' = ' '{print $2}' | tr -d '"') && \
 gcloud compute ssh redis-kafka-server --zone="${GCP_ZONE}" --command='bash -s' <<'EOF'
 sudo bash -c '
 mkdir -p /opt/infra && cd /opt/infra
