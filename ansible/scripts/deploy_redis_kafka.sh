@@ -1,6 +1,8 @@
 GCP_ZONE=$(grep 'zone' ../../infrastructure/terraform.tfvars | awk -F' = ' '{print $2}' | tr -d '"') && \
-gcloud compute ssh redis-kafka-server --zone="${GCP_ZONE}" --command='bash -s' <<'EOF'
+KAFKA_IP=$(gcloud compute instances describe redis-kafka-server --zone=us-central1-b --format=json | jq '.networkInterfaces.[0].accessConfigs.[0].natIP' -r) && \
+gcloud compute ssh redis-kafka-server --zone="${GCP_ZONE}" --command='bash -s' <<EOF
 sudo bash -c '
+KAFKA_IP="${KAFKA_IP}"
 mkdir -p /opt/infra && cd /opt/infra
 
 cat > docker-compose.yml <<COMPOSE
@@ -48,7 +50,7 @@ services:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://${KAFKA_IP}:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
