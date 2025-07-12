@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: cloud-native-ecommerce
+data:
+  SMTP_PORT: '587'
+  SMTP_HOST: smtp.gmail.com
+  REDIS_URL: redis://34.53.66.103:6379
+  KAFKA_BROKER: 34.53.66.103:9092
+  KAFKA_EMAIL_TOPIC: email_notifications
+  MONGO_URL: mongodb://34.83.44.22:27017
+  EMAIL_FROM: mugdhodzs38@gmail.com
+  CART_DB_URI: jdbc:postgresql://34.82.236.104:5432/cart_db
+  ORDER_DB_URI: jdbc:postgresql://34.82.236.104:5432/order_db
+  DB_USERNAME: mugdho
+  DB_PASSWORD: admin
+  REDIS_HOST: 34.53.66.103
+  REDIS_PORT: '6379'
+  JWT_ISSUER_URI: https://34.83.44.22:8080/realms/cloud-native-ecommerce
+  JWT_SET_URI: https://34.83.44.22:8080/realms/cloud-native-ecommerce/protocol/openid-connect/certs
+  API_KEY: secret-api-key
+  PORT: '8080'
