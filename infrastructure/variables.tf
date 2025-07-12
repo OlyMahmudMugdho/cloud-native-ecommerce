@@ -44,7 +44,7 @@ variable "redis_kafka_tags" {
 
 variable "redis_kafka_rule_ranges" {
   type    = set(string)
-  default = ["10.2.0.0/16"]
+  default = ["0.0.0.0/0"]
 }
 
 variable "redis_kafka_vm_name" {
