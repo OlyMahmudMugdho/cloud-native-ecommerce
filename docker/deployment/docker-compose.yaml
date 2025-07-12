@@ -162,6 +162,7 @@ services:
       - JWT_ISSUER_URI=http://keycloak:8080/realms/cloud-native-ecommerce
       - JWT_SET_URI=http://keycloak:8080/realms/cloud-native-ecommerce/protocol/openid-connect/certs
       - API_KEY=secret-api-key
+      - INVENTORY_SERVICE_URI=http://inventory-service:8080
     networks:
       - app-network
     depends_on:
