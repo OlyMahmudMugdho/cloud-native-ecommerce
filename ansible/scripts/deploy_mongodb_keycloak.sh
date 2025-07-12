@@ -1,6 +1,6 @@
 GCP_PROJECT=$(grep 'project' ../../infrastructure/terraform.tfvars | awk -F' = ' '{print $2}' | tr -d '"') && \
 GCP_ZONE=$(grep 'zone' ../../infrastructure/terraform.tfvars | awk -F' = ' '{print $2}' | tr -d '"') && \
-POSTGRES_HOST_IP=$(jq '.sql_instance_external_ip.value' ../../infrastructure/output.json -r) && \
+POSTGRES_HOST_IP=$(gcloud sql instances describe database-instance --format=json | jq '.ipAddresses.[0].ipAddress' -r) && \
 KC_DB_USERNAME="mugdho" && \
 KC_DB_PASSWORD="admin" && \
 gcloud compute ssh mongodb-keycloak-server --zone="${GCP_ZONE}" --command='bash -s' <<EOF
