@@ -34,3 +34,22 @@ resource "google_compute_firewall" "mongodb_keycloak_ssh_rule" {
 
   priority = 100
 }
+
+
+
+resource "google_compute_firewall" "allow_gke_icmp" {
+  name    = "gke-allow-icmp"
+  network = google_compute_network.workloads_network.name
+
+  direction = "INGRESS"
+  priority  = 1000
+
+  source_ranges = [
+    "10.1.0.0/16",
+  ]
+
+  allow {
+    protocol = "icmp"
+  }
+
+}
