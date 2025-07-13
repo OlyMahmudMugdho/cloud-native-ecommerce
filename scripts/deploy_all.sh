@@ -1,24 +1,11 @@
 #!/bin/bash
 
-# Navigate to the scripts directory and execute gcp_login.sh
-cd ansible/scripts/ && \
-sh gcp_login.sh && \
-pwd &&
-
-# Navigate to the infrastructure directory
-cd ../../infrastructure && \
-pwd && \
-
-# Make all shell scripts executable
-chmod +x *.sh && \
-
-# Export the environment variable and execute reset_tf.sh
-sh reset_tf.sh && \
-
-# Execute run.sh with the environment variable
-sh run.sh && \
-
-# Navigate to the ansible directory and execute run.sh
-cd ../ansible && \
-chmod +x *.sh && \
-sh run.sh
+nohup ./install_linux_packages.sh > install.log 2>&1 &
+cd ../infrastructure
+./reset_tf.sh
+./run.sh
+cd ../ansible
+./run1.sh
+./run2.sh
+./run3.sh
+./run4.sh
