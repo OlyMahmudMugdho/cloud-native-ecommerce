@@ -1,5 +1,6 @@
-GCP_ZONE=$(grep 'zone' ../../infrastructure/terraform.tfvars | awk -F' = ' '{print $2}' | tr -d '"') && \
-KAFKA_IP=$(gcloud compute instances describe redis-kafka-server --zone=us-central1-b --format=json | jq '.networkInterfaces.[0].accessConfigs.[0].natIP' -r) && \
+GCP_ZONE=$(grep 'zone' ~/cloud-native-ecommerce/infrastructure/terraform.tfvars | awk -F' = ' '{print $2}' | tr -d '"') && \
+./gcp_login.sh
+KAFKA_IP=$(gcloud compute instances describe redis-kafka-server --zone=$GCP_ZONE --format=json | jq '.networkInterfaces.[0].accessConfigs.[0].natIP' -r) && \
 gcloud compute ssh redis-kafka-server --zone="${GCP_ZONE}" --command='bash -s' <<EOF
 sudo bash -c '
 KAFKA_IP="${KAFKA_IP}"
