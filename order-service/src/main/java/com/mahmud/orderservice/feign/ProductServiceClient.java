@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.*;
 
-@FeignClient(name = "product-service", configuration = FeignConfig.class)
+@FeignClient(name = "product-service", url="http://product-service", configuration = FeignConfig.class)
 public interface ProductServiceClient {
 
     @GetMapping("/api/products/cart/{userId}")

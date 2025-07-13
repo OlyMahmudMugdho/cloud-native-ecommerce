@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(name = "inventory-service", configuration = FeignConfig.class)
+@FeignClient(name = "inventory-service", url="http://inventory-service", configuration = FeignConfig.class)
 public interface InventoryServiceClient {
 
     @GetMapping("/products")
