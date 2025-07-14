@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloud-gateway-service
+  namespace: cloud-native-ecommerce
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloud-gateway-service
+  template:
+    metadata:
+      labels:
+        app: cloud-gateway-service
+    spec:
+      containers:
+        - name: cloud-gateway-service
+          image: olymahmudmugdho/cne-cloud-gateway
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: app-config
+            - secretRef:
+                name: app-secrets
