@@ -3,7 +3,7 @@
 # Configuration
 REALM_NAME="cloud-native-ecommerce"
 CLIENT_ID="product-service"
-KEYCLOAK_URL="http://localhost:8088"
+KEYCLOAK_URL="https://34.48.185.178/"
 ADMIN_USER="admin"
 ADMIN_PASS="admin"
 USER_USERNAME="testuser"
@@ -11,12 +11,12 @@ USER_PASSWORD="password123"
 USER_EMAIL="mugdhodzs38@gmail.com"
 ROLE_NAME="USER"
 
-PRODUCT_SERVICE_URL="http://localhost:8081"
-ORDER_SERVICE_URL="http://localhost:8082"
-INVENTORY_SERVICE_URL="http://localhost:8083"
+PRODUCT_SERVICE_URL="http://35.245.104.175"
+ORDER_SERVICE_URL="http://35.245.104.175"
+INVENTORY_SERVICE_URL="http://34.86.120.57"
 PRODUCT_API_KEY="secret-api-key"
 INVENTORY_API_KEY="secret-api-key"
-PRODUCT_ID="6864c021932bf212e7c829ad"
+PRODUCT_ID="68752b1c2b989286ccab3a91"
 QUANTITY=2
 
 # Colors for output
@@ -38,19 +38,19 @@ TOKEN=$(curl -s -X POST "$KEYCLOAK_URL/realms/master/protocol/openid-connect/tok
   -d "grant_type=password" \
   -d "client_id=admin-cli" \
   -d "username=$ADMIN_USER" \
-  -d "password=$ADMIN_PASS" | jq -r '.access_token')
+  -d "password=$ADMIN_PASS" --insecure | jq -r '.access_token')
 
 # Create Realm
 echo ">>> Creating realm if not exists..."
 REALM_EXISTS=$(curl -s -o /dev/null -w "%{http_code}" \
   -X GET "$KEYCLOAK_URL/admin/realms/$REALM_NAME" \
-  -H "Authorization: Bearer $TOKEN")
+  -H "Authorization: Bearer $TOKEN" --insecure)
 
 if [ "$REALM_EXISTS" -ne 200 ]; then
   curl -s -X POST "$KEYCLOAK_URL/admin/realms" \
     -H "Authorization: Bearer $TOKEN" \
     -H "Content-Type: application/json" \
-    -d '{"realm":"'"$REALM_NAME"'","enabled":true}'
+    -d '{"realm":"'"$REALM_NAME"'","enabled":true}' --insecure
   echo "Realm created."
 else
   echo "Realm already exists."
@@ -59,7 +59,7 @@ fi
 # Create Client
 echo ">>> Creating client if not exists..."
 CLIENTS=$(curl -s -X GET "$KEYCLOAK_URL/admin/realms/$REALM_NAME/clients" \
-  -H "Authorization: Bearer $TOKEN")
+  -H "Authorization: Bearer $TOKEN" --insecure)
 CLIENT_UUID=$(echo "$CLIENTS" | jq -r '.[] | select(.clientId == "'"$CLIENT_ID"'") | .id')
 
 if [ -z "$CLIENT_UUID" ]; then
@@ -74,7 +74,7 @@ if [ -z "$CLIENT_UUID" ]; then
       "directAccessGrantsEnabled": true,
       "standardFlowEnabled": false,
       "redirectUris": ["*"]
-    }'
+    }' --insecure
   CLIENT_UUID=$(curl -s -X GET "$KEYCLOAK_URL/admin/realms/$REALM_NAME/clients" \
     -H "Authorization: Bearer $TOKEN" | jq -r '.[] | select(.clientId == "'"$CLIENT_ID"'") | .id')
   echo "Client created."
@@ -94,12 +94,12 @@ curl -s -X POST "$KEYCLOAK_URL/admin/realms/$REALM_NAME/users" \
     "lastName": "User",
     "email": "'"$USER_EMAIL"'",
     "emailVerified": true
-  }' > /dev/null
+  }' --insecure > /dev/null
 
 # Get user ID
 sleep 1
 USER_ID=$(curl -s -X GET "$KEYCLOAK_URL/admin/realms/$REALM_NAME/users?username=$USER_USERNAME" \
-  -H "Authorization: Bearer $TOKEN" | jq -r '.[0].id')
+  -H "Authorization: Bearer $TOKEN" --insecure | jq -r '.[0].id')
 
 # Set password
 echo ">>> Resetting user password..."
@@ -110,33 +110,33 @@ curl -s -X PUT "$KEYCLOAK_URL/admin/realms/$REALM_NAME/users/$USER_ID/reset-pass
     "type": "password",
     "temporary": false,
     "value": "'"$USER_PASSWORD"'"
-  }'
+  }' --insecure
 
 # Create role if needed
 echo ">>> Creating role..."
 ROLE_EXISTS=$(curl -s -o /dev/null -w "%{http_code}" \
   -X GET "$KEYCLOAK_URL/admin/realms/$REALM_NAME/roles/$ROLE_NAME" \
-  -H "Authorization: Bearer $TOKEN")
+  -H "Authorization: Bearer $TOKEN" --insecure)
 if [ "$ROLE_EXISTS" -ne 200 ]; then
   curl -s -X POST "$KEYCLOAK_URL/admin/realms/$REALM_NAME/roles" \
     -H "Authorization: Bearer $TOKEN" \
     -H "Content-Type: application/json" \
-    -d '{"name":"'"$ROLE_NAME"'","description":"User role"}'
+    -d '{"name":"'"$ROLE_NAME"'","description":"User role"}' --insecure
 fi
 
 # Assign role
 echo ">>> Assigning role..."
 ROLE_OBJ=$(curl -s -X GET "$KEYCLOAK_URL/admin/realms/$REALM_NAME/roles/$ROLE_NAME" \
-  -H "Authorization: Bearer $TOKEN")
+  -H "Authorization: Bearer $TOKEN" --insecure)
 curl -s -X POST "$KEYCLOAK_URL/admin/realms/$REALM_NAME/users/$USER_ID/role-mappings/realm" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d "[$ROLE_OBJ]"
+  -d "[$ROLE_OBJ]" --insecure
 
 # Get client secret
 echo ">>> Getting client secret..."
 CLIENT_SECRET=$(curl -s -X GET "$KEYCLOAK_URL/admin/realms/$REALM_NAME/clients/$CLIENT_UUID/client-secret" \
-  -H "Authorization: Bearer $TOKEN" | jq -r '.value')
+  -H "Authorization: Bearer $TOKEN" --insecure | jq -r '.value')
 
 # Get user token
 echo ">>> Logging in as user..."
@@ -147,7 +147,7 @@ USER_TOKEN=$(curl -s -X POST "$KEYCLOAK_URL/realms/$REALM_NAME/protocol/openid-c
   -d "username=$USER_USERNAME" \
   -d "password=$USER_PASSWORD" \
   -d "client_secret=$CLIENT_SECRET" \
-  -d "scope=openid" | jq -r '.access_token')
+  -d "scope=openid" --insecure | jq -r '.access_token')
 
 if [ "$USER_TOKEN" == "null" ]; then
   echo -e "${RED}Failed to get user token.${NC}"
@@ -168,7 +168,7 @@ CART_RESPONSE=$(curl -s -X POST "$PRODUCT_SERVICE_URL/products/cart" \
             \"quantity\": $QUANTITY
           }
         ]
-      }")
+      }" --insecure)
 
 CART_ID=$(echo "$CART_RESPONSE" | jq -r '.id')
 if [ "$CART_ID" == "null" ]; then

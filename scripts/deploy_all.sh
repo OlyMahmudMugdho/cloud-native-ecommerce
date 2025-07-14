@@ -9,3 +9,20 @@ cd ../ansible
 ./run2.sh
 ./run3.sh
 ./run4.sh
+cd ../scripts
+./commands.sh
+sleep 10
+./commands.sh
+sleep 10
+./commands.sh
+sleep 10
+./commands.sh
+sleep 10
+./commands.sh
+sleep 10
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
+kubectl create namespace ingress-nginx
+helm install ingress-nginx ingress-nginx/ingress-nginx \
+  --namespace ingress-nginx
+./apply_k8s.sh
