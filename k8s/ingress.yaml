@@ -4,30 +4,15 @@ metadata:
   name: ecommerce-ingress
   namespace: cloud-native-ecommerce
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
+  ingressClassName: nginx
   rules:
-    - host: api.ecommerce.local
-      http:
+    - http:
         paths:
-          - path: /inventory
+          - path: /
             pathType: Prefix
             backend:
               service:
-                name: inventory-service
-                port:
-                  number: 80
-          - path: /product
-            pathType: Prefix
-            backend:
-              service:
-                name: product-service
-                port:
-                  number: 80
-          - path: /order
-            pathType: Prefix
-            backend:
-              service:
-                name: order-service
+                name: cloud-gateway-service
                 port:
                   number: 80
