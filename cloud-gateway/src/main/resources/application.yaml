@@ -1,0 +1,23 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: cloud-gateway
+
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          routes:
+          - id: product-service
+            uri: http://product-service
+            predicates:
+              - Path=/products/**
+            # filters:
+            #   - StripPrefix=1
+
+          - id: order-service
+            uri: http://order-service
+            predicates:
+              - Path=/order/**
