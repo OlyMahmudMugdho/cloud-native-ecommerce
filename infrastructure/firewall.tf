@@ -25,7 +25,7 @@ resource "google_compute_firewall" "mongodb_keycloak_ssh_rule" {
 
   allow {
     protocol = "tcp"
-    ports    = ["22", "8443", "27017"]
+    ports    = ["22", "8080", "27017"]
   }
 
   source_ranges = var.mongodb_keycloak_rule_ssh_source

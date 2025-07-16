@@ -18,7 +18,7 @@ yq -y ".data.KAFKA_BROKER = \"$(jq -r '.redis_kafka_vm_ip.value' ../infrastructu
 yq -y ".data.REDIS_HOST = \"$(jq -r '.redis_kafka_vm_ip.value' ../infrastructure/output.json)\"" ../k8s/configmap.yaml | sponge ../k8s/configmap.yaml
 
 # update JWT_ISSUER_URI
-yq -y ".data.JWT_ISSUER_URI = \"https://$(jq -r '.mongodb_keycloak_vm_external_ip.value' ../infrastructure/output.json):8080/realms/cloud-native-ecommerce\"" ../k8s/configmap.yaml | sponge ../k8s/configmap.yaml
+yq -y ".data.JWT_ISSUER_URI = \"http://$(jq -r '.mongodb_keycloak_vm_external_ip.value' ../infrastructure/output.json):8080/realms/cloud-native-ecommerce\"" ../k8s/configmap.yaml | sponge ../k8s/configmap.yaml
 
 # update JWT_SET_URI
-yq -y ".data.JWT_SET_URI = \"https://$(jq -r '.mongodb_keycloak_vm_external_ip.value' ../infrastructure/output.json):8080/realms/cloud-native-ecommerce/protocol/openid-connect/certs\"" ../k8s/configmap.yaml | sponge ../k8s/configmap.yaml
+yq -y ".data.JWT_SET_URI = \"http://$(jq -r '.mongodb_keycloak_vm_external_ip.value' ../infrastructure/output.json):8080/realms/cloud-native-ecommerce/protocol/openid-connect/certs\"" ../k8s/configmap.yaml | sponge ../k8s/configmap.yaml

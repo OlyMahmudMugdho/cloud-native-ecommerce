@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: cloud-gateway-service
-          image: olymahmudmugdho/cne-cloud-gateway
+          image: olymahmudmugdho/cne-cloud-gateway:july-16-7-pm
           ports:
             - containerPort: 8080
           envFrom:

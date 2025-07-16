@@ -20,4 +20,4 @@ spring:
           - id: order-service
             uri: http://order-service
             predicates:
-              - Path=/order/**
+              - Path=/orders/**
