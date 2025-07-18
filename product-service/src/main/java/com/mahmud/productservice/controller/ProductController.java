@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/products/info")
+@CrossOrigin("*")
 public class ProductController {
 
     private final ProductService productService;
