@@ -3,6 +3,9 @@ package com.mahmud.orderservice.controller;
 import com.mahmud.orderservice.dto.OrderDTO;
 import com.mahmud.orderservice.dto.StripeResponse;
 import com.mahmud.orderservice.service.OrderService;
+
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -10,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/orders")
+
 public class OrderController {
 
     private final OrderService orderService;
@@ -30,4 +34,11 @@ public class OrderController {
         String userId = jwt.getSubject();
         return orderService.getOrder(id, userId);
     }
+
+    @GetMapping
+    public List<OrderDTO> getAllOrders(@AuthenticationPrincipal Jwt jwt) {
+        String userId = jwt.getSubject();
+        return orderService.getAllOrders(userId);
+    }
+
 }
