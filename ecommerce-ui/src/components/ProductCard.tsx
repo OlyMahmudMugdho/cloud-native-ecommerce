@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { useKeycloak } from "../lib/KeycloakContext";
 
 interface Product {
   id: string;
@@ -17,14 +16,9 @@ interface ProductCardProps {
 }
 
 export const ProductCard = ({ product }: ProductCardProps) => {
-  const { isAuthenticated, login } = useKeycloak();
   const navigate = useNavigate();
 
   const handleClick = () => {
-    if (!isAuthenticated) {
-      login();
-      return;
-    }
     navigate(`/products/${product.id}`);
   };
 

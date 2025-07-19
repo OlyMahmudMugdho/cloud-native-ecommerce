@@ -1,24 +1,13 @@
-import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { getCart, updateCart, deleteCart, checkout } from "../lib/api";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { useKeycloak } from "../lib/KeycloakContext";
 import keycloak from "../lib/keycloak";
-import { CheckCircle2Icon, AlertCircleIcon } from "lucide-react";
+import { toast, Toaster } from "sonner"; // ✅ Import toast
 
 export const Cart = () => {
   const { isAuthenticated, login } = useKeycloak();
-  const [alert, setAlert] = useState<{ title: string; description: string; variant?: "default" | "destructive" } | null>(null);
-
-  // Auto-dismiss alert after 3 seconds
-  useEffect(() => {
-    if (alert) {
-      const timer = setTimeout(() => setAlert(null), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [alert]);
 
   const { data, refetch } = useQuery({
     queryKey: ["cart"],
@@ -31,22 +20,11 @@ export const Cart = () => {
     onSuccess: () => {
       console.log("Cart updated successfully");
       refetch();
-      setAlert({
-        title: "Success",
-        description: "Cart updated successfully",
-      });
+      toast.success("Cart updated successfully"); // ✅ toast
     },
     onError: (error: any) => {
-      console.error("Failed to update cart:", {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-      });
-      setAlert({
-        title: "Error",
-        description: error.response?.data?.message || "Failed to update cart",
-        variant: "destructive",
-      });
+      console.error("Failed to update cart:", error);
+      toast.error(error.response?.data?.message || "Failed to update cart");
     },
   });
 
@@ -55,22 +33,11 @@ export const Cart = () => {
     onSuccess: () => {
       console.log("Cart deleted successfully");
       refetch();
-      setAlert({
-        title: "Success",
-        description: "Cart cleared successfully",
-      });
+      toast.success("Cart cleared successfully");
     },
     onError: (error: any) => {
-      console.error("Failed to delete cart:", {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-      });
-      setAlert({
-        title: "Error",
-        description: error.response?.data?.message || "Failed to clear cart",
-        variant: "destructive",
-      });
+      console.error("Failed to delete cart:", error);
+      toast.error(error.response?.data?.message || "Failed to clear cart");
     },
   });
 
@@ -78,23 +45,12 @@ export const Cart = () => {
     mutationFn: checkout,
     onSuccess: (data) => {
       console.log("Checkout successful:", data.data);
-      setAlert({
-        title: "Success",
-        description: "Redirecting to checkout...",
-      });
+      toast.success("Redirecting to checkout...");
       window.location.href = data.data.sessionUrl;
     },
     onError: (error: any) => {
-      console.error("Checkout failed:", {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-      });
-      setAlert({
-        title: "Error",
-        description: error.response?.data?.message || "Checkout failed",
-        variant: "destructive",
-      });
+      console.error("Checkout failed:", error);
+      toast.error(error.response?.data?.message || "Checkout failed");
     },
   });
 
@@ -110,11 +66,7 @@ export const Cart = () => {
 
   const handleUpdateQuantity = (productId: string, quantity: number) => {
     if (quantity < 1) {
-      setAlert({
-        title: "Error",
-        description: "Quantity cannot be less than 1",
-        variant: "destructive",
-      });
+      toast.error("Quantity cannot be less than 1");
       return;
     }
     const payload = {
@@ -127,16 +79,7 @@ export const Cart = () => {
   };
 
   return (
-    <div className="relative">
-      {alert && (
-        <div className="absolute top-0 left-0 right-0 z-10 p-4 max-w-xl mx-auto">
-          <Alert variant={alert.variant || "default"}>
-            {alert.variant === "destructive" ? <AlertCircleIcon /> : <CheckCircle2Icon />}
-            <AlertTitle>{alert.title}</AlertTitle>
-            <AlertDescription>{alert.description}</AlertDescription>
-          </Alert>
-        </div>
-      )}
+    <div>
       <Card>
         <CardHeader>
           <CardTitle>Your Cart</CardTitle>
@@ -146,6 +89,7 @@ export const Cart = () => {
             <div key={item.productId} className="flex justify-between mb-2">
               <span>Product Name: {item.productId}</span>
               <div>
+                <Toaster richColors />
                 <Button
                   onClick={() => handleUpdateQuantity(item.productId, item.quantity + 1)}
                   size="sm"
@@ -164,19 +108,13 @@ export const Cart = () => {
             </div>
           ))}
           <Button
-            onClick={() => {
-              console.log("Attempting to delete cart");
-              deleteMutation.mutate();
-            }}
+            onClick={() => deleteMutation.mutate()}
             variant="destructive"
           >
             Clear Cart
           </Button>
           <Button
-            onClick={() => {
-              console.log("Attempting checkout");
-              checkoutMutation.mutate();
-            }}
+            onClick={() => checkoutMutation.mutate()}
             className="ml-2"
           >
             Checkout

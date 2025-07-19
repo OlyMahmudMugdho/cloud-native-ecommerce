@@ -2,12 +2,12 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { Button } from "../components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert";
 import { CheckCircle2Icon, AlertCircleIcon } from "lucide-react";
-import { getProduct, addToCart, getCart } from "../lib/api";
+import { getProduct, getCart } from "../lib/api";
 import { useKeycloak } from "../lib/KeycloakContext";
 import keycloak from "../lib/keycloak";
+import { AddToCartButton } from "../components/AddToCartButton";
 
 interface Product {
   id: string;
@@ -21,7 +21,7 @@ interface Product {
 
 export const ProductDetails = () => {
   const { id } = useParams<{ id: string }>();
-  const { isAuthenticated, login } = useKeycloak();
+  // const { isAuthenticated, login } = useKeycloak();
   const [alert, setAlert] = useState<{ title: string; description: string; variant?: "default" | "destructive" } | null>(null);
 
   // Auto-dismiss alert after 3 seconds
@@ -37,47 +37,6 @@ export const ProductDetails = () => {
     queryFn: () => getProduct(id!),
     enabled: !!id,
   });
-
-  const handleAddToCart = async () => {
-    if (!isAuthenticated) {
-      login();
-      return;
-    }
-    try {
-      let cartId;
-      try {
-        const cartResponse = await getCart();
-        cartId = cartResponse.data?.id;
-      } catch (error) {
-        console.log("No existing cart found, creating new one");
-      }
-
-      const payload = {
-        ...(cartId && { id: cartId }),
-        userId: keycloak.subject,
-        items: [{ productId: id!, quantity: 1 }],
-      };
-
-      console.log("Add to cart payload:", payload);
-      const response = await addToCart(payload);
-      console.log("Add to cart response:", response.data);
-      setAlert({
-        title: "Success",
-        description: "Added to cart!",
-      });
-    } catch (error: any) {
-      console.error("Failed to add to cart:", {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-      });
-      setAlert({
-        title: "Error",
-        description: error.response?.data?.message || "Failed to add to cart",
-        variant: "destructive",
-      });
-    }
-  };
 
   if (isLoading) return <div>Loading...</div>;
   if (error || !data?.data) return <div>Error loading product details</div>;
@@ -111,13 +70,7 @@ export const ProductDetails = () => {
             <p className="mt-2"><strong>Category:</strong> {product.category}</p>
             <p className="mt-2"><strong>Stock:</strong> {product.stock}</p>
             <p className="mt-2"><strong>ID:</strong> {product.id}</p>
-            <Button
-              onClick={handleAddToCart}
-              className="mt-4"
-              disabled={product.stock === 0}
-            >
-              Add to Cart
-            </Button>
+            <AddToCartButton productId={product.id} disabled={product.stock === 0} />
           </div>
         </CardContent>
       </Card>

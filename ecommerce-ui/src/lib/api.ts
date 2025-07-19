@@ -1,7 +1,12 @@
 import axios from "axios";
 import keycloak from "./keycloak";
 
-// Axios instance for product-related endpoints
+// Axios instance for public endpoints that don't require authentication
+const publicApi = axios.create({
+  baseURL: "http://localhost:8081",
+});
+
+// Axios instance for product-related endpoints that require authentication
 const productApi = axios.create({
   baseURL: "http://localhost:8081",
 });
@@ -33,9 +38,11 @@ orderApi.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Product-related API calls
-export const getProducts = () => productApi.get("/products/info");
-export const getProduct = (id: string) => productApi.get(`/products/info/${id}`);
+// Public API calls (no authentication required)
+export const getProducts = () => publicApi.get("/products/info");
+export const getProduct = (id: string) => publicApi.get(`/products/info/${id}`);
+
+// Protected API calls (authentication required)
 export const getCart = () => productApi.get("/products/cart");
 export const addToCart = (cartData: any) => productApi.post("/products/cart", cartData);
 export const updateCart = (cartData: any) => productApi.put("/products/cart", cartData);
@@ -46,4 +53,4 @@ export const checkout = () => orderApi.post("/orders/checkout");
 export const getOrders = () => orderApi.get("/orders");
 export const getOrder = (id: string) => orderApi.get(`/orders/${id}`);
 
-export { productApi, orderApi };
+export { productApi, orderApi, publicApi };
