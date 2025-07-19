@@ -23,10 +23,13 @@ export const Navbar = () => {
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center space-x-4">
           <ModeToggle />
+          <Link to="/">
+            <Button variant="ghost">Home</Button>
+          </Link>
           <Link to="/cart">
             <Button variant="ghost">Cart</Button>
           </Link>
-          <Link to="/orders">
+          <Link to="/my-orders">
             <Button variant="ghost">Orders</Button>
           </Link>
           {isAuthenticated && (
@@ -70,12 +73,17 @@ export const Navbar = () => {
             <div className="flex justify-start">
               <ModeToggle />
             </div>
+            <Link to="/" onClick={toggleDrawer}>
+              <Button variant="ghost" className="w-full justify-start">
+                Home
+              </Button>
+            </Link>
             <Link to="/cart" onClick={toggleDrawer}>
               <Button variant="ghost" className="w-full justify-start">
                 Cart
               </Button>
             </Link>
-            <Link to="/orders" onClick={toggleDrawer}>
+            <Link to="/my-orders" onClick={toggleDrawer}>
               <Button variant="ghost" className="w-full justify-start">
                 Orders
               </Button>

@@ -38,10 +38,10 @@ export const Footer = () => {
         <div>
           <h3 className="text-lg font-semibold mb-4">Follow Us</h3>
           <div className="flex space-x-4 mb-4">
-            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
-              Twitter
+            <a href="https://x.com/OlyMahmudMugdho" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
+              Twitter/X
             </a>
-            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
+            <a href="https://facebook.com/Oly.Mahmud38" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
               Facebook
             </a>
             <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
@@ -51,7 +51,7 @@ export const Footer = () => {
         </div>
       </div>
       <div className="container mx-auto px-4 mt-8 text-center border-t border-border pt-4">
-        <p>© {new Date().getFullYear()} E-commerce App. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} Distributed Cloud Native E-commerce System. All rights reserved.</p>
       </div>
     </footer>
   );

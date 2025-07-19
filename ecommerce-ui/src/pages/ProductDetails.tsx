@@ -1,13 +1,14 @@
-import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert";
-import { CheckCircle2Icon, AlertCircleIcon } from "lucide-react";
-import { getProduct, getCart } from "../lib/api";
-import { useKeycloak } from "../lib/KeycloakContext";
-import keycloak from "../lib/keycloak";
+import { getProduct } from "../lib/api";
 import { AddToCartButton } from "../components/AddToCartButton";
+import { toast } from "sonner";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
 
 interface Product {
   id: string;
@@ -21,16 +22,6 @@ interface Product {
 
 export const ProductDetails = () => {
   const { id } = useParams<{ id: string }>();
-  // const { isAuthenticated, login } = useKeycloak();
-  const [alert, setAlert] = useState<{ title: string; description: string; variant?: "default" | "destructive" } | null>(null);
-
-  // Auto-dismiss alert after 3 seconds
-  useEffect(() => {
-    if (alert) {
-      const timer = setTimeout(() => setAlert(null), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [alert]);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["product", id],
@@ -38,39 +29,35 @@ export const ProductDetails = () => {
     enabled: !!id,
   });
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error || !data?.data) return <div>Error loading product details</div>;
+  if (isLoading) return <div className="p-4">Loading...</div>;
+  if (error || !data?.data) {
+    toast.error("Failed to load product details");
+    return <div className="p-4">Error loading product details</div>;
+  }
 
   const product: Product = data.data;
 
   return (
-    <div className="relative container mx-auto p-4 min-h-screen">
-      {alert && (
-        <div className="absolute top-0 left-0 right-0 z-10 p-4 max-w-xl mx-auto">
-          <Alert variant={alert.variant || "default"}>
-            {alert.variant === "destructive" ? <AlertCircleIcon /> : <CheckCircle2Icon />}
-            <AlertTitle>{alert.title}</AlertTitle>
-            <AlertDescription>{alert.description}</AlertDescription>
-          </Alert>
-        </div>
-      )}
-      <Card className="max-w-2xl mx-auto">
+    <div className="container mx-auto p-4 min-h-screen">
+      <Card className="w-full">
         <CardHeader>
-          <CardTitle>{product.name}</CardTitle>
+          <CardTitle className="text-2xl">{product.name}</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col md:flex-row gap-6">
-          <img
-            src={product.image_url}
-            alt={product.name}
-            className="w-full md:w-1/2 h-64 object-cover rounded-md"
-          />
-          <div className="flex-1">
-            <p className="text-lg font-semibold">Price: ${product.price}</p>
-            <p className="mt-2"><strong>Description:</strong> {product.description}</p>
-            <p className="mt-2"><strong>Category:</strong> {product.category}</p>
-            <p className="mt-2"><strong>Stock:</strong> {product.stock}</p>
-            <p className="mt-2"><strong>ID:</strong> {product.id}</p>
-            <AddToCartButton productId={product.id} disabled={product.stock === 0} />
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <img
+              src={product.image_url}
+              alt={product.name}
+              className="w-full h-96 object-cover rounded-md"
+            />
+            <div className="flex flex-col gap-4">
+              <p className="text-xl font-semibold text-green-600">${product.price}</p>
+              <p><strong>Description:</strong> {product.description}</p>
+              <p><strong>Category:</strong> {product.category}</p>
+              <p><strong>Stock:</strong> {product.stock}</p>
+              <p><strong>ID:</strong> {product.id}</p>
+              <AddToCartButton productId={product.id} disabled={product.stock === 0} />
+            </div>
           </div>
         </CardContent>
       </Card>
