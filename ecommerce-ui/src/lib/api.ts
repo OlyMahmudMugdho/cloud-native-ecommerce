@@ -1,22 +1,47 @@
 import axios from "axios";
 import keycloak from "./keycloak";
 
-// Axios instance for public endpoints that don't require authentication
+// Fallback base URLs
+const FALLBACK_PRODUCT_BASE_URL = "http://localhost:8081";
+const FALLBACK_ORDER_BASE_URL = "http://localhost:8082";
+
+interface ConfigResponse {
+  productApiUrl?: string;
+  orderApiUrl?: string;
+}
+
+let productBaseUrl = FALLBACK_PRODUCT_BASE_URL;
+let orderBaseUrl = FALLBACK_ORDER_BASE_URL;
+
+// Function to fetch config from /config endpoint
+async function fetchConfig() {
+  try {
+    const response = await axios.get<ConfigResponse>("/config");
+    const config = response.data;
+    if (config.productApiUrl) productBaseUrl = config.productApiUrl;
+    if (config.orderApiUrl) orderBaseUrl = config.orderApiUrl;
+  } catch (error) {
+    console.log("Failed to load config from /config, using fallback URLs");
+  }
+}
+
+// Immediately invoke fetchConfig, but don't wait to export API instances (so code below will use updated URLs once fetched)
+fetchConfig();
+
+// Axios instances initialized with current URLs (will be fallback initially, but fetchConfig can update variables later)
 const publicApi = axios.create({
-  baseURL: "http://localhost:8081",
+  baseURL: productBaseUrl,
 });
 
-// Axios instance for product-related endpoints that require authentication
 const productApi = axios.create({
-  baseURL: "http://localhost:8081",
+  baseURL: productBaseUrl,
 });
 
-// Axios instance for order-related endpoints
 const orderApi = axios.create({
-  baseURL: "http://localhost:8082",
+  baseURL: orderBaseUrl,
 });
 
-// Add Keycloak token to productApi requests
+// Add Keycloak token interceptor to productApi
 productApi.interceptors.request.use(
   async (config) => {
     if (keycloak.token) {
@@ -27,7 +52,7 @@ productApi.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Add Keycloak token to orderApi requests
+// Add Keycloak token interceptor to orderApi
 orderApi.interceptors.request.use(
   async (config) => {
     if (keycloak.token) {
