@@ -144,7 +144,7 @@ export const Cart = () => {
         <CardContent>
           {data.data.items.map((item: any) => (
             <div key={item.productId} className="flex justify-between mb-2">
-              <span>Product ID: {item.productId}</span>
+              <span>Product Name: {item.productId}</span>
               <div>
                 <Button
                   onClick={() => handleUpdateQuantity(item.productId, item.quantity + 1)}

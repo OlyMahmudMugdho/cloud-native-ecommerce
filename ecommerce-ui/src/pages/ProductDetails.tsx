@@ -85,7 +85,7 @@ export const ProductDetails = () => {
   const product: Product = data.data;
 
   return (
-    <div className="relative container mx-auto p-4">
+    <div className="relative container mx-auto p-4 min-h-screen">
       {alert && (
         <div className="absolute top-0 left-0 right-0 z-10 p-4 max-w-xl mx-auto">
           <Alert variant={alert.variant || "default"}>
