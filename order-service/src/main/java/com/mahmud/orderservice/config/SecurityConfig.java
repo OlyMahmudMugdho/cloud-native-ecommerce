@@ -9,6 +9,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,6 +29,14 @@ public class SecurityConfig {
                         .requestMatchers("/orders/webhook").permitAll() // Allow Stripe webhook
                         .anyRequest().authenticated()
                 )
+                .cors(cors -> cors.configurationSource(request -> {      // CORS configuration
+                        CorsConfiguration config = new CorsConfiguration();
+                        config.setAllowedOrigins(Arrays.asList("http://localhost:5173")); // Allow React origin
+                        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));          // Allowed methods
+                        config.setAllowedHeaders(Arrays.asList("Authorization", "content-type"));        // Allow Authorization header
+                        config.setAllowCredentials(false);
+                        return config;
+                    }))
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 );
