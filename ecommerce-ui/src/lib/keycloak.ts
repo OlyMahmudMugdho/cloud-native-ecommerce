@@ -1,9 +1,9 @@
 import Keycloak from "keycloak-js";
 
 const keycloak = new Keycloak({
-  url: "http://localhost:8088", // Replace with your Keycloak server URL
-  realm: "cloud-native-ecommerce",
-  clientId: "react-app",
+  url: import.meta.env.VITE_KEYCLOAK_URL, // Replace with your Keycloak server URL
+  realm: import.meta.env.VITE_REALM,
+  clientId: import.meta.env.VITE_CLIENT_ID,
 });
 
 let isInitialized = false;
@@ -15,6 +15,7 @@ export const initKeycloak = async () => {
   try {
     await keycloak.init({
       onLoad: "check-sso", // Use check-sso to avoid forcing login
+      silentCheckSsoRedirectUri: window.location.origin + "/silent-check-sso.html",
       checkLoginIframe: false, // Disable iframe check for compatibility
     });
     isInitialized = true;

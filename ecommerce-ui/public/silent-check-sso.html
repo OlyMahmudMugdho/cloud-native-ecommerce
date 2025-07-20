@@ -1,11 +1,8 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Silent Check SSO</title>
-</head>
-<body>
-  <script>
-    window.parent.postMessage({ type: "silent-check-sso" }, "*");
-  </script>
-</body>
+  <body>
+    <script>
+      parent.postMessage(location.href, location.origin);
+    </script>
+  </body>
 </html>

@@ -1,47 +1,22 @@
 import axios from "axios";
 import keycloak from "./keycloak";
 
-// Fallback base URLs
-const FALLBACK_PRODUCT_BASE_URL = "http://localhost:8081";
-const FALLBACK_ORDER_BASE_URL = "http://localhost:8082";
-
-interface ConfigResponse {
-  productApiUrl?: string;
-  orderApiUrl?: string;
-}
-
-let productBaseUrl = FALLBACK_PRODUCT_BASE_URL;
-let orderBaseUrl = FALLBACK_ORDER_BASE_URL;
-
-// Function to fetch config from /config endpoint
-async function fetchConfig() {
-  try {
-    const response = await axios.get<ConfigResponse>("/config");
-    const config = response.data;
-    if (config.productApiUrl) productBaseUrl = config.productApiUrl;
-    if (config.orderApiUrl) orderBaseUrl = config.orderApiUrl;
-  } catch (error) {
-    console.log("Failed to load config from /config, using fallback URLs");
-  }
-}
-
-// Immediately invoke fetchConfig, but don't wait to export API instances (so code below will use updated URLs once fetched)
-fetchConfig();
-
-// Axios instances initialized with current URLs (will be fallback initially, but fetchConfig can update variables later)
+// Axios instance for public endpoints that don't require authentication
 const publicApi = axios.create({
-  baseURL: productBaseUrl,
+  baseURL: import.meta.env.VITE_PUBLIC_API_URL,
 });
 
+// Axios instance for product-related endpoints that require authentication
 const productApi = axios.create({
-  baseURL: productBaseUrl,
+  baseURL: import.meta.env.VITE_PRODUCT_API_URL,
 });
 
+// Axios instance for order-related endpoints
 const orderApi = axios.create({
-  baseURL: orderBaseUrl,
+  baseURL: import.meta.env.VITE_ORDER_API_URL,
 });
 
-// Add Keycloak token interceptor to productApi
+// Add Keycloak token to productApi requests
 productApi.interceptors.request.use(
   async (config) => {
     if (keycloak.token) {
@@ -52,7 +27,7 @@ productApi.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Add Keycloak token interceptor to orderApi
+// Add Keycloak token to orderApi requests
 orderApi.interceptors.request.use(
   async (config) => {
     if (keycloak.token) {
