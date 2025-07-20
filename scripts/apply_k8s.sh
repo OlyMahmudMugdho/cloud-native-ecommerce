@@ -6,4 +6,5 @@ kubectl apply -f product/
 kubectl apply -f inventory/
 kubectl apply -f order/
 kubectl apply -f gateway/
+kubectl apply -f ecommerce-ui/
 kubectl apply -f ingress.yaml

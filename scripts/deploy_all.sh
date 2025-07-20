@@ -26,3 +26,6 @@ kubectl create namespace ingress-nginx
 helm install ingress-nginx ingress-nginx/ingress-nginx \
   --namespace ingress-nginx
 ./apply_k8s.sh
+
+sleep 60
+./get_vars.sh
