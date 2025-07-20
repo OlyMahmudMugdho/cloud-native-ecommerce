@@ -47,7 +47,7 @@ public class SecurityConfig {
                 )
                 .cors(cors -> cors.configurationSource(request -> {      // CORS configuration
                         CorsConfiguration config = new CorsConfiguration();
-                        config.setAllowedOrigins(Arrays.asList("http://localhost:5173")); // Allow React origin
+                        config.setAllowedOrigins(Arrays.asList("*")); // Allow All origin
                         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));          // Allowed methods
                         config.setAllowedHeaders(Arrays.asList("Authorization", "content-type"));        // Allow Authorization header
                         config.setAllowCredentials(false);
