@@ -17,7 +17,7 @@ data:
   DB_PASSWORD: admin
   REDIS_HOST: 35.245.11.116
   REDIS_PORT: '6379'
-  JWT_ISSUER_URI: http://34.48.197.27:8080/realms/cloud-native-ecommerce
-  JWT_SET_URI: http://34.48.197.27:8080/realms/cloud-native-ecommerce/protocol/openid-connect/certs
+  JWT_ISSUER_URI: https://lemur-15.cloud-iam.com/auth/realms/cloud-native-ecommerce
+  JWT_SET_URI: https://lemur-15.cloud-iam.com/auth/realms/cloud-native-ecommerce/protocol/openid-connect/certs
   API_KEY: secret-api-key
   PORT: '8080'
