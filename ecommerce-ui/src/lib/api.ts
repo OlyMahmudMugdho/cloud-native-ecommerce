@@ -3,17 +3,17 @@ import keycloak from "./keycloak";
 
 // Axios instance for public endpoints that don't require authentication
 const publicApi = axios.create({
-  baseURL: import.meta.env.VITE_PUBLIC_API_URL,
+  baseURL: import.meta.env.VITE_PUBLIC_API_URL || "http://localhost:8081",
 });
 
 // Axios instance for product-related endpoints that require authentication
 const productApi = axios.create({
-  baseURL: import.meta.env.VITE_PRODUCT_API_URL,
+  baseURL: import.meta.env.VITE_PRODUCT_API_URL || "http://localhost:8081",
 });
 
 // Axios instance for order-related endpoints
 const orderApi = axios.create({
-  baseURL: import.meta.env.VITE_ORDER_API_URL,
+  baseURL: import.meta.env.VITE_ORDER_API_URL || "http://localhost:8082",
 });
 
 // Add Keycloak token to productApi requests
