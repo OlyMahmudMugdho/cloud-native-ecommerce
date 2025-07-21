@@ -10,7 +10,7 @@ OUTPUT_JSON="../infrastructure/output.json"
 SQL_INSTANCE_EXTERNAL_IP=$(jq -r '.sql_instance_external_ip.value' "$OUTPUT_JSON")
 MONGODB_KEYCLOAK_VM_EXTERNAL_IP=$(jq -r '.mongodb_keycloak_vm_external_ip.value' "$OUTPUT_JSON")
 REDIS_KAFKA_VM_IP=$(jq -r '.redis_kafka_vm_ip.value' "$OUTPUT_JSON")
-KEYCLOAK_IP=$(jq -r '.sql_instance_external_ip.value' "$OUTPUT_JSON")
+KEYCLOAK_IP=$(jq -r '.mongodb_keycloak_vm_external_ip.value' "$OUTPUT_JSON")
 
 
 
