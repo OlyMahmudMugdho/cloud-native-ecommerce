@@ -10,16 +10,7 @@ cd ../ansible
 ./run3.sh
 ./run4.sh
 cd ../scripts
-./commands.sh
-sleep 10
-./commands.sh
-sleep 10
-./commands.sh
-sleep 10
-./commands.sh
-sleep 10
-./commands.sh
-sleep 10
+
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm repo update
 kubectl create namespace ingress-nginx
