@@ -9,6 +9,8 @@ import { Footer } from "./components/Footer";
 import { ThemeProvider } from "./components/theme-provider";
 import { KeycloakProvider } from "./lib/KeycloakContext";
 import UserProfile from "./pages/UserProfile";
+import { PaymentSuccess } from "./pages/PaymentSuccess";
+import { PaymentCancel } from "./pages/PaymentCancel";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +27,8 @@ function App() {
               <Route path="/my-orders" element={<OrdersPage />} />
               <Route path="/products/:id" element={<ProductDetails />} />
               <Route path="/profile" element={<UserProfile />} />
+              <Route path="/payment-success" element={<PaymentSuccess />} />
+              <Route path="/payment-cancel" element={<PaymentCancel />} />
             </Routes>
             <Footer />
           </BrowserRouter>

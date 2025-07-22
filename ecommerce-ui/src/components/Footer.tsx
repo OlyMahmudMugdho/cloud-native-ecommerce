@@ -29,9 +29,9 @@ export const Footer = () => {
         {/* Contact Info */}
         <div>
           <h3 className="text-lg font-semibold mb-4">Contact Us</h3>
-          <p>Email: support@example.com</p>
+          <p>Email: oly.ice.pust@gmail.com</p>
           <p>Phone: (123) 456-7890</p>
-          <p>Address: 123 E-commerce St, Shop City</p>
+          <p>Address: Dinapur Sadar, Dinajpur-5200, Bangladesh</p>
         </div>
 
         {/* Social Media & Theme Switcher */}
