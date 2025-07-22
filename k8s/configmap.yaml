@@ -21,3 +21,4 @@ data:
   JWT_SET_URI: https://lemur-15.cloud-iam.com/auth/realms/cloud-native-ecommerce/protocol/openid-connect/certs
   API_KEY: secret-api-key
   PORT: '8080'
+  INVENTORY_HOST: 35.236.244.43
