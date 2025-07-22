@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloud-native-ecommerce
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/OlyMahmudMugdho/cne-k8s-manifests
+    targetRevision: HEAD
+    path: infra/k8s
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cloud-native-ecommerce
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
