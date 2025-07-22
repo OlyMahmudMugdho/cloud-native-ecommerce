@@ -34,3 +34,6 @@ gh secret set MONGODB_KEYCLOAK_VM_EXTERNAL_IP --body "$MONGODB_KEYCLOAK_VM_EXTER
 gh secret set REDIS_KAFKA_VM_IP --body "$REDIS_KAFKA_VM_IP" -r "OlyMahmudMugdho/cloud-native-ecommerce" -a actions
 
 gh secret set SQL_INSTANCE_EXTERNAL_IP --body "$SQL_INSTANCE_EXTERNAL_IP" -r "OlyMahmudMugdho/cloud-native-ecommerce" -a actions
+
+
+gh secret set INVENTORY_HOST --body "$INVENTORY_IP" -r "OlyMahmudMugdho/cloud-native-ecommerce" -a actions
