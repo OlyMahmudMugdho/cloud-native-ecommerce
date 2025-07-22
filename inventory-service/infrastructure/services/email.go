@@ -30,7 +30,7 @@ func (s *emailService) SendVerificationEmail(to, token string) error {
 		To:      to,
 		Token:   token,
 		Subject: "Verify Your Email",
-		Body:    fmt.Sprintf("Click the link to verify your email: http://localhost:%s/inventory/api/users/verify/%s", s.cfg.Port, token),
+		Body:    fmt.Sprintf("Click the link to verify your email: http://%s/inventory/api/users/verify/%s", s.cfg.InventoryHost, token),
 	}
 	return s.kafkaProducer.SendEmailMessage(context.Background(), msg)
 }
