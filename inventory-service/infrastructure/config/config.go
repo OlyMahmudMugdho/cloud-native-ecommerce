@@ -38,7 +38,7 @@ func LoadConfig() (*Config, error) {
 		RedisURL:            os.Getenv("REDIS_URL"),
 		KafkaBroker:         os.Getenv("KAFKA_BROKER"),
 		KafkaEmailTopic:     os.Getenv("KAFKA_EMAIL_TOPIC"),
-		InventoryHost:		 os.Getenv("INVENTORY_HOST")
+		InventoryHost:		 os.Getenv("INVENTORY_HOST"),
 	}
 
 	// Parse SMTP_PORT from string to int
