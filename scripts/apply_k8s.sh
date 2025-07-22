@@ -31,3 +31,6 @@ kubectl patch svc argocd-server -n argocd -p \
     ]
   }
 }'
+
+kubectl apply -f argocd
+
