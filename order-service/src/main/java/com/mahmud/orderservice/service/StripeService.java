@@ -57,8 +57,8 @@ public class StripeService {
             SessionCreateParams params =
                     SessionCreateParams.builder()
                             .setMode(SessionCreateParams.Mode.PAYMENT)
-                            .setSuccessUrl("http://localhost:8082/success")
-                            .setCancelUrl("http://localhost:8082/cancel")
+                            .setSuccessUrl("https://cloud-native-ecommerce.netlify.app/payment-success")
+                            .setCancelUrl("https://cloud-native-ecommerce.netlify.app/payment-cancel")
                             .setInvoiceCreation(SessionCreateParams.InvoiceCreation.builder().setEnabled(true).build())
                             .addAllLineItem(lineItems)
                             .putMetadata("app_username", userId)
