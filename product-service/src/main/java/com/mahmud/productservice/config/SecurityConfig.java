@@ -47,8 +47,8 @@ public class SecurityConfig {
                 )
                 .cors(cors -> cors.configurationSource(request -> {      // CORS configuration
                         CorsConfiguration config = new CorsConfiguration();
-                        config.setAllowedOrigins(Arrays.asList("*")); // Allow All origin
-                        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));          // Allowed methods
+                        config.setAllowedOrigins(Arrays.asList("*", "https://cloud-native-ecommerce.netlify.app")); // Allow All origin
+                        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));          // Allowed methods
                         config.setAllowedHeaders(Arrays.asList("Authorization", "content-type"));        // Allow Authorization header
                         config.setAllowCredentials(false);
                         return config;
