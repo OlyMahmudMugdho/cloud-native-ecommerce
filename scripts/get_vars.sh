@@ -14,6 +14,11 @@ KEYCLOAK_IP=$(jq -r '.mongodb_keycloak_vm_external_ip.value' "$OUTPUT_JSON")
 
 
 
+ARGOCD_PASSWORD=$(kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | base64 -d && echo)
+ARGOCD_SERVER=$(kubectl get svc -n argocd | grep argocd-server | grep LoadBalancer | awk '{print $4}')
+# ARGOCD_SERVER="https://$ARGOCD_IP"
+ARGOCD_APP=cloud-native-ecommerce
+ARGOCD_USERNAME=admin
 
 echo "LB_IP=$LB_IP" >> vars.txt
 echo "INVENTORY_IP=$INVENTORY_IP" >> vars.txt
@@ -24,16 +29,25 @@ echo "MONGODB_KEYCLOAK_VM_EXTERNAL_IP=$MONGODB_KEYCLOAK_VM_EXTERNAL_IP" >> vars.
 echo "REDIS_KAFKA_VM_IP=$REDIS_KAFKA_VM_IP" >> vars.txt
 echo "SQL_INSTANCE_EXTERNAL_IP=$SQL_INSTANCE_EXTERNAL_IP" >> vars.txt
 
-
-gh secret set KEYCLOAK_IP --body "$KEYCLOAK_IP" -r "OlyMahmudMugdho/cloud-native-ecommerce" -a actions
-
-gh secret set LB_IP --body "$LB_IP" -r "OlyMahmudMugdho/cloud-native-ecommerce" -a actions
-
-gh secret set MONGODB_KEYCLOAK_VM_EXTERNAL_IP --body "$MONGODB_KEYCLOAK_VM_EXTERNAL_IP" -r "OlyMahmudMugdho/cloud-native-ecommerce" -a actions
-
-gh secret set REDIS_KAFKA_VM_IP --body "$REDIS_KAFKA_VM_IP" -r "OlyMahmudMugdho/cloud-native-ecommerce" -a actions
-
-gh secret set SQL_INSTANCE_EXTERNAL_IP --body "$SQL_INSTANCE_EXTERNAL_IP" -r "OlyMahmudMugdho/cloud-native-ecommerce" -a actions
+echo "ARGOCD_USERNAME=$ARGOCD_USERNAME" >> vars.txt
+echo "ARGOCD_IP=$ARGOCD_IP" >> vars.txt
+echo "ARGOCD_SERVER=$ARGOCD_SERVER" >> vars.txt
+echo "ARGOCD_PASSWORD=$ARGOCD_PASSWORD" >> vars.txt
 
 
-gh secret set INVENTORY_HOST --body "$INVENTORY_IP" -r "OlyMahmudMugdho/cloud-native-ecommerce" -a actions
+gh secret set KEYCLOAK_IP --body "$KEYCLOAK_IP" -r "spacesthree/cloud-native-ecommerce" -a actions
+
+gh secret set LB_IP --body "$LB_IP" -r "spacesthree/cloud-native-ecommerce" -a actions
+
+gh secret set MONGODB_KEYCLOAK_VM_EXTERNAL_IP --body "$MONGODB_KEYCLOAK_VM_EXTERNAL_IP" -r "spacesthree/cloud-native-ecommerce" -a actions
+
+gh secret set REDIS_KAFKA_VM_IP --body "$REDIS_KAFKA_VM_IP" -r "spacesthree/cloud-native-ecommerce" -a actions
+
+gh secret set SQL_INSTANCE_EXTERNAL_IP --body "$SQL_INSTANCE_EXTERNAL_IP" -r "spacesthree/cloud-native-ecommerce" -a actions
+
+gh secret set INVENTORY_HOST --body "$INVENTORY_IP" -r "spacesthree/cloud-native-ecommerce" -a actions
+
+
+gh secret set ARGOCD_SERVER --body "$ARGOCD_SERVER" -r "spacesthree/cloud-native-ecommerce" -a actions
+gh secret set ARGOCD_USERNAME --body "$ARGOCD_USERNAME" -r "spacesthree/cloud-native-ecommerce" -a actions
+gh secret set ARGOCD_PASSWORD --body "$ARGOCD_PASSWORD" -r "spacesthree/cloud-native-ecommerce" -a actions
