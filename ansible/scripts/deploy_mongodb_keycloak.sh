@@ -1,9 +1,5 @@
 GCP_PROJECT=$(grep 'project' ~/cloud-native-ecommerce/infrastructure/terraform.tfvars | awk -F' = ' '{print $2}' | tr -d '"') && \
 GCP_ZONE=$(grep 'zone' ~/cloud-native-ecommerce/infrastructure/terraform.tfvars | awk -F' = ' '{print $2}' | tr -d '"') && \
-POSTGRES_HOST=$(cat ~/env-files/.pghost) && \
-echo $POSTGRES_HOST
-KC_DB_USERNAME=$(cat ~/env-files/.pguser) && \
-KC_DB_PASSWORD=$(cat ~/env-files/.pgpass) && \
 gcloud compute ssh mongodb-keycloak-server --zone="${GCP_ZONE}" --command='bash -s' <<EOF
 sudo bash -c '
 POSTGRES_HOST="${POSTGRES_HOST}"
@@ -31,27 +27,6 @@ services:
     restart: unless-stopped
     volumes:
       - mongodb_data:/data/db
-    networks:
-      - app-network
-
-  keycloak:
-    image: quay.io/keycloak/keycloak:latest
-    container_name: keycloak
-    environment:
-      KC_BOOTSTRAP_ADMIN_USERNAME: admin
-      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
-      KC_HOSTNAME_STRICT_BACKCHANNEL: true
-      KC_HTTP_RELATIVE_PATH: /
-      KC_HTTP_ENABLED: true
-      KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://${POSTGRES_HOST}/keycloak?sslmode=require&channel_binding=require
-      KC_DB_USERNAME: ${KC_DB_USERNAME}
-      KC_DB_PASSWORD: ${KC_DB_PASSWORD}
-    command:
-      - start-dev
-    ports:
-      - "8080:8080"
-    restart: unless-stopped
     networks:
       - app-network
 COMPOSE
