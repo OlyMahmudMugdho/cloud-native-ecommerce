@@ -18,5 +18,16 @@ helm install ingress-nginx ingress-nginx/ingress-nginx \
   --namespace ingress-nginx
 ./apply_k8s.sh
 
+kubectl create ns monitoring
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+helm install prometheus-stack prometheus-community/kube-prometheus-stack \
+  --namespace monitoring
+kubectl patch svc prometheus-stack-grafana \
+  -n monitoring \
+  -p '{"spec": {"type": "LoadBalancer"}}'
+
+
 sleep 60
 ./get_vars.sh
+
