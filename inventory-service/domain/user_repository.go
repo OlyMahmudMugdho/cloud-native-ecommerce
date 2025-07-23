@@ -7,6 +7,6 @@ type UserRepository interface {
 	FindByEmail(email string) (*models.User, error)
 	FindByID(id string) (*models.User, error)
 	Update(user *models.User) error
-	FindByVerificationToken(token string) (*models.User, error)
+	FindByVerificationOTP(otp string) (*models.User, error)
 	FindByResetToken(token string) (*models.User, error)
 }

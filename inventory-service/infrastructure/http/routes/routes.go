@@ -18,21 +18,17 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// Add this new CORS middleware function
 func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Set CORS headers
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
-		// Handle preflight OPTIONS request
 		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusOK)
 			return
 		}
 
-		// Call the next handler
 		next.ServeHTTP(w, r)
 	})
 }
@@ -40,13 +36,11 @@ func corsMiddleware(next http.Handler) http.Handler {
 func SetupRouter(mongoClient *db.MongoClient, cfg *config.Config, kafkaProducer *messaging.KafkaProducer, redisClient *cache.RedisClient) *mux.Router {
 	r := mux.NewRouter()
 
-	// Apply CORS middleware to the main router
 	r.Use(corsMiddleware)
 
 	apiRouter := r.PathPrefix("/inventory/api").Subrouter()
 	log.Println("API router initialized with prefix /inventory/api")
 
-	// Rest of your existing code remains the same...
 	productRepo := repository.NewProductRepository(mongoClient, "inventory_db", "products", redisClient)
 	userRepo := repository.NewUserRepository(mongoClient, "inventory_db", "users")
 	categoryRepo := repository.NewCategoryRepository(mongoClient, "inventory_db", "categories", redisClient)
@@ -70,7 +64,7 @@ func SetupRouter(mongoClient *db.MongoClient, cfg *config.Config, kafkaProducer 
 
 	apiRouter.HandleFunc("/users/register", userHandler.Register).Methods("POST")
 	apiRouter.HandleFunc("/users/login", userHandler.Login).Methods("POST")
-	apiRouter.HandleFunc("/users/verify/{token}", userHandler.VerifyEmail).Methods("GET")
+	apiRouter.HandleFunc("/users/verify-otp", userHandler.VerifyOTP).Methods("POST")
 	apiRouter.HandleFunc("/users/password/reset", userHandler.RequestPasswordReset).Methods("POST")
 	apiRouter.HandleFunc("/users/password/reset/{token}", userHandler.ResetPassword).Methods("POST")
 	apiRouter.HandleFunc("/products", productHandler.GetAllProducts).Methods("GET")

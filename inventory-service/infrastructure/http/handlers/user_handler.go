@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/gorilla/mux"
 )
 
 type UserHandler struct {
@@ -41,7 +40,7 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte("Registration successful, please verify your email"))
+	w.Write([]byte("Registration successful, please check your email for the OTP"))
 }
 
 func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
@@ -66,13 +65,21 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"token": token})
 }
 
-func (h *UserHandler) VerifyEmail(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	token := vars["token"]
+func (h *UserHandler) VerifyOTP(w http.ResponseWriter, r *http.Request) {
+	var verifyOTPDTO dto.VerifyOTPDTO
+	if err := json.NewDecoder(r.Body).Decode(&verifyOTPDTO); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
 
-	err := h.usecase.VerifyEmail(token)
+	if err := h.validator.Struct(verifyOTPDTO); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err := h.usecase.VerifyOTP(verifyOTPDTO.Email, verifyOTPDTO.OTP)
 	if err != nil {
-		http.Error(w, "Invalid or expired token", http.StatusBadRequest)
+		http.Error(w, "Invalid or expired OTP", http.StatusBadRequest)
 		return
 	}
 

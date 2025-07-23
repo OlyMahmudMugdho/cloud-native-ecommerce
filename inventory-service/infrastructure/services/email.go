@@ -8,7 +8,7 @@ import (
 )
 
 type EmailService interface {
-	SendVerificationEmail(to, token string) error
+	SendVerificationOTP(to, otp string) error
 	SendPasswordResetEmail(to, token string) error
 }
 
@@ -24,13 +24,13 @@ func NewEmailService(cfg *config.Config, kafkaProducer *messaging.KafkaProducer)
 	}
 }
 
-func (s *emailService) SendVerificationEmail(to, token string) error {
+func (s *emailService) SendVerificationOTP(to, otp string) error {
 	msg := messaging.EmailMessage{
-		Type:    "verification",
+		Type:    "verification_otp",
 		To:      to,
-		Token:   token,
-		Subject: "Verify Your Email",
-		Body:    fmt.Sprintf("Click the link to verify your email: http://%s/inventory/api/users/verify/%s", s.cfg.InventoryHost, token),
+		Token:   otp,
+		Subject: "Verify Your Email with OTP",
+		Body:    fmt.Sprintf("Your verification OTP is: %s\nPlease use this code to verify your email. It expires in 15 minutes.", otp),
 	}
 	return s.kafkaProducer.SendEmailMessage(context.Background(), msg)
 }

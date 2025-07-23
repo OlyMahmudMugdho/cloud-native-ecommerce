@@ -64,9 +64,9 @@ func (r *UserRepositoryImpl) Update(user *models.User) error {
 	return err
 }
 
-func (r *UserRepositoryImpl) FindByVerificationToken(token string) (*models.User, error) {
+func (r *UserRepositoryImpl) FindByVerificationOTP(otp string) (*models.User, error) {
 	coll := r.client.Database(r.dbName).Collection(r.collection)
-	filter := bson.M{"verification_token": token}
+	filter := bson.M{"verification_otp": otp}
 
 	var user models.User
 	err := coll.FindOne(context.Background(), filter).Decode(&user)
