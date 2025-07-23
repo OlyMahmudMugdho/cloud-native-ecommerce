@@ -45,7 +45,6 @@ interface Product {
   image_url: string;
 }
 
-
 interface PaginatedResponse<T> {
   products: T[];
   total: number;
@@ -59,7 +58,8 @@ export const auth = {
     api.post('/users/register', { email, password }),
   login: (email: string, password: string) =>
     api.post('/users/login', { email, password }),
-  verifyEmail: (token: string) => api.get(`/users/verify/${token}`),
+  verifyOTP: (email: string, otp: string) =>
+    api.post('/users/verify-otp', { email, otp }),
   requestPasswordReset: (email: string) =>
     api.post('/users/password/reset', { email }),
   resetPassword: (token: string, newPassword: string) =>

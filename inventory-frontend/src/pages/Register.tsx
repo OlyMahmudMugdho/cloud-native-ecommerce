@@ -7,9 +7,13 @@ export default function Register() {
   const navigate = useNavigate();
 
   const handleRegister = async ({ email, password }: { email: string; password: string }) => {
-    await auth.register(email, password);
-    toast.success('Registration successful! Please check your email for verification.');
-    navigate('/login');
+    try {
+      await auth.register(email, password);
+      toast.success('Registration successful! Please check your email for your OTP.');
+      navigate('/verify');
+    } catch (error) {
+      toast.error('Registration failed. Please try again.');
+    }
   };
 
   return (

@@ -10,9 +10,9 @@ import Register from '@/pages/Register';
 import VerifyEmail from '@/pages/VerifyEmail';
 import ResetPassword from '@/pages/ResetPassword';
 import Products from '@/pages/Products';
-import ProductDetails from '@/pages/ProductDetails'; // New import
+import ProductDetails from '@/pages/ProductDetails';
 import Categories from '@/pages/Categories';
-import CategoryDetails from '@/pages/CategoryDetails'; // New import
+import CategoryDetails from '@/pages/CategoryDetails';
 import UserManagementDetail from './pages/UserManagementDetail';
 import UserManagement from './pages/UserManagement';
 import ProductUpdate from './pages/ProductUpdate';
@@ -32,7 +32,7 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                <Route path="/verify/:token" element={<VerifyEmail />} />
+                <Route path="/verify" element={<VerifyEmail />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/reset-password/:token" element={<ResetPassword />} />
                 <Route path="/products" element={<Products />} />
@@ -43,9 +43,9 @@ function App() {
                 <Route path="/categories/:id" element={<CategoryDetails />} />
                 <Route path="/categories/edit/:id" element={<CategoryUpdate />} />
                 <Route path="/categories/new" element={<CategoryNew />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
                 <Route path="/user-management" element={<UserManagement />} />
                 <Route path="/user-management/:id" element={<UserManagementDetail />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </main>
             <Footer />
