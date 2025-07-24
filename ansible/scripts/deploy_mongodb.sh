@@ -1,6 +1,6 @@
 GCP_PROJECT=$(grep 'project' ../..//infrastructure/terraform.tfvars | awk -F' = ' '{print $2}' | tr -d '"') && \
 GCP_ZONE=$(grep 'zone' ../..//infrastructure/terraform.tfvars | awk -F' = ' '{print $2}' | tr -d '"') && \
-gcloud compute ssh mongodb-keycloak-server --zone="${GCP_ZONE}" --command='bash -s' <<EOF
+gcloud compute ssh mongodb-server --zone="${GCP_ZONE}" --command='bash -s' <<EOF
 sudo bash -c '
 POSTGRES_HOST="${POSTGRES_HOST}"
 KC_DB_USERNAME="${KC_DB_USERNAME}"

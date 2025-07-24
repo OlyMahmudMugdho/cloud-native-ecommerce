@@ -4,7 +4,7 @@ GCP_PROJECT=$(grep 'project' ../infrastructure/terraform.tfvars | awk -F' = ' '{
 GCP_ZONE=$(grep 'zone' ../infrastructure/terraform.tfvars | awk -F' = ' '{print $2}' | tr -d '"') && \
 gcloud auth login --cred-file=../infrastructure/account.json --quiet && \
 gcloud config set project ${GCP_PROJECT} --quiet && \
-KEYCLOAK_VM_IP=$(gcloud compute instances describe mongodb-keycloak-server --zone=$GCP_ZONE --format=json | jq '.networkInterfaces.[0].accessConfigs.[0].natIP' -r) && \
+KEYCLOAK_VM_IP=$(gcloud compute instances describe mongodb-server --zone=$GCP_ZONE --format=json | jq '.networkInterfaces.[0].accessConfigs.[0].natIP' -r) && \
 KEYCLOAK_URL="http://$KEYCLOAK_VM_IP:8080"
 
 # Configuration

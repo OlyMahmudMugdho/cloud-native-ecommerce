@@ -1,4 +1,4 @@
-- name: Setup mongodb-keycloak-server
+- name: Setup mongodb-server
   hosts: local
   connection: local
   tasks:

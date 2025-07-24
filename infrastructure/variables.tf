@@ -63,31 +63,31 @@ variable "redis_kafka_machine_type" {
   default = "e2-standard-4"
 }
 
-variable "mongodb_keycloak_machine_type" {
+variable "mongodb_machine_type" {
   type    = string
   default = "e2-standard-4"
 }
 
 
-variable "mongodb_keycloak_vm_name" {
+variable "mongodb_vm_name" {
   type    = string
-  default = "mongodb-keycloak-server"
+  default = "mongodb-server"
 }
 
-variable "mongodb_keycloak_tags" {
+variable "mongodb_tags" {
   type    = set(string)
-  default = ["mongodb-keycloak"]
+  default = ["mongodb"]
 }
 
-variable "mongodb_keycloak_rule_ssh_source" {
+variable "mongodb_rule_ssh_source" {
   type    = set(string)
   default = ["0.0.0.0/0"]
 }
 
 
-variable "mongodb_keycloak_rule_name" {
+variable "mongodb_rule_name" {
   type    = string
-  default = "mongodb-keycloak-rule"
+  default = "mongodb-rule"
 }
 
 

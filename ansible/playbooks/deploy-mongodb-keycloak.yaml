@@ -1,9 +1,0 @@
-- name: Deploy mongodb-keycloak-server
-  hosts: local
-  connection: local
-  tasks:
-    - name: Deploy mongodb and keycloak
-      shell: chmod +x ./../scripts/deploy_mongodb_keycloak.sh
-
-    - name: Deploy mongodb and keycloak
-      shell: ./../scripts/deploy_mongodb_keycloak.sh

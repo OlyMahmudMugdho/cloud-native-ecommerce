@@ -25,12 +25,12 @@ resource "google_compute_instance" "redis_kafka_vm" {
 
 }
 
-resource "google_compute_instance" "mongodb_keycloak_vm" {
-  name         = var.mongodb_keycloak_vm_name
-  machine_type = var.mongodb_keycloak_machine_type
+resource "google_compute_instance" "mongodb_vm" {
+  name         = var.mongodb_vm_name
+  machine_type = var.mongodb_machine_type
   zone         = var.zone
 
-  tags = var.mongodb_keycloak_tags
+  tags = var.mongodb_tags
 
   boot_disk {
     initialize_params {
