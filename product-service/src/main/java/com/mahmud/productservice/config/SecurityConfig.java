@@ -43,6 +43,9 @@ public class SecurityConfig {
 			.requestMatchers("/api/products/cart/*").permitAll()
                         .requestMatchers("/products/api-docs").permitAll()
                         .requestMatchers("/products/api-docs*/*").permitAll()
+                        .requestMatchers("/actuator").permitAll()
+                        .requestMatchers("/products/actuator/*").permitAll()
+                        .requestMatchers("/products/actuator/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .cors(cors -> cors.configurationSource(request -> {      // CORS configuration

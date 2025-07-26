@@ -27,6 +27,9 @@ spring:
           # issuer-uri: ${JWT_ISSUER_URI:http://localhost:8088/realms/cloud-native-ecommerce}
           # jwk-set-uri: ${JWT_SET_URI:http://localhost:8088/realms/cloud-native-ecommerce/protocol/openid-connect/certs}
 management:
+  endpoints:
+    web:
+      base-path: /products/actuator
   tracing:
     sample: 
       probability: 1.0 # ensures all requests are traced 

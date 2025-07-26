@@ -28,6 +28,11 @@ kubectl patch svc prometheus-stack-grafana \
   -p '{"spec": {"type": "LoadBalancer"}}'
 
 
-sleep 60
+helm repo add openzipkin https://openzipkin.github.io/zipkin
+helm repo update
+helm install zipkin openzipkin/zipkin --namespace monitoring
+kubectl patch svc zipkin -n monitoring -p '{"spec": {"type": "LoadBalancer"}}'
+
+
 ./get_vars.sh
 

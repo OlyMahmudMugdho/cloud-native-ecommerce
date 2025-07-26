@@ -27,6 +27,9 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/orders/webhook").permitAll() // Allow Stripe webhook
+                        .requestMatchers("/actuator").permitAll()
+                        .requestMatchers("/orders/actuator/*").permitAll()
+                        .requestMatchers("/orders/actuator/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .cors(cors -> cors.configurationSource(request -> {      // CORS configuration
