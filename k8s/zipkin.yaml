@@ -4,6 +4,7 @@ metadata:
   name: zipkin
   labels:
     app: zipkin
+  namespace: cloud-native-ecommerce
 spec:
   replicas: 1
   selector:

@@ -3,7 +3,6 @@ kind: Ingress
 metadata:
   name: ecommerce-ingress
   namespace: cloud-native-ecommerce
-  annotations:
 spec:
   ingressClassName: nginx
   rules:
