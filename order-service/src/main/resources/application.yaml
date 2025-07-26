@@ -27,7 +27,11 @@ spring:
           # issuer-uri: ${JWT_ISSUER_URI:http://localhost:8088/realms/cloud-native-ecommerce}
           # jwk-set-uri: ${JWT_SET_URI:http://localhost:8088/realms/cloud-native-ecommerce/protocol/openid-connect/certs}
 
-
+  zipkin:
+    base-url: http://zipkin-service:9411/
+  sleuth:
+    sampler:
+      probability: 1.0 
 eureka:
   client:
     service-url:
