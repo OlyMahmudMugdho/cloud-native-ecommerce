@@ -21,3 +21,4 @@ data:
   JWT_SET_URI: https://lemur-15.cloud-iam.com/auth/realms/cloud-native-ecommerce/protocol/openid-connect/certs
   API_KEY: secret-api-key
   PORT: '8080'
+  ZIPKIN_BASE_URL: "http://zipkin.cloud-native-ecommerce.svc.cluster.local:9411"

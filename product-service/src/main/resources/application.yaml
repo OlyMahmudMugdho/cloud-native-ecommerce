@@ -30,11 +30,15 @@ management:
   endpoints:
     web:
       base-path: /products/actuator
+      exposure:
+        include: "*"
   tracing:
     sample: 
       probability: 1.0 # ensures all requests are traced 
   zipkin: 
     base-url: http://zipkin:9411 # Zipkin URL within Kubernetes 
+    tracing:
+      endpoint: http://zipkin:9411/api/v2/spans
 
 eureka:
   client:
