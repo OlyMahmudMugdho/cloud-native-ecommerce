@@ -1,0 +1,154 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+
+env:
+  DOCKER_HUB_USERNAME: olymahmudmugdho
+  IMAGE_TAG: ${{ github.sha }}
+  INFRA_REPO: https://github.com/OlyMahmudMugdho/cne-k8s-manifests.git
+  INFRA_BRANCH: main
+  # LB_IP: 123.456.789.000
+  # KEYCLOAK_IP: 111.222.333.444
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [product-service, order-service, inventory-service, ecommerce-ui]
+
+    steps:
+      - name: Checkout main repo
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      # React frontend for ecommerce-ui
+      - name: Build and push ecommerce-ui
+        if: matrix.service == 'ecommerce-ui'
+        run: |
+          cd ecommerce-ui
+          docker build \
+            --build-arg VITE_PUBLIC_API_URL=http://${{ secrets.LB_IP }} \
+            --build-arg VITE_PRODUCT_API_URL=http://${{ secrets.LB_IP }} \
+            --build-arg VITE_ORDER_API_URL=http://${{ secrets.LB_IP }} \
+            -t $DOCKER_HUB_USERNAME/cne-ecommerce-ui:$IMAGE_TAG .
+
+          docker push $DOCKER_HUB_USERNAME/cne-ecommerce-ui:$IMAGE_TAG
+
+      # Inventory-service: React + Go
+      - name: Build and Dockerize Inventory Service
+        if: matrix.service == 'inventory-service'
+        run: |
+          cd inventory-frontend
+          npm ci
+          npm run build
+          mkdir -p ../inventory-service/cmd/dist
+          cp -r dist/* ../inventory-service/cmd/dist/
+
+          cd ../inventory-service
+          go mod tidy
+          make build
+          docker build -t $DOCKER_HUB_USERNAME/inventory-service:$IMAGE_TAG .
+          docker push $DOCKER_HUB_USERNAME/inventory-service:$IMAGE_TAG
+
+      - name: Set up Java 21
+        if: matrix.service == 'product-service' || matrix.service == 'order-service'
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Build and Dockerize Spring Boot Services
+        if: matrix.service == 'product-service' || matrix.service == 'order-service'
+        run: |
+          cd ${{ matrix.service }}
+          ./mvnw clean package -DskipTests
+          docker build -t $DOCKER_HUB_USERNAME/${{ matrix.service }}:$IMAGE_TAG .
+          docker push $DOCKER_HUB_USERNAME/${{ matrix.service }}:$IMAGE_TAG
+
+  update-k8s-manifests:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout k8s manifest repo
+        uses: actions/checkout@v4
+        with:
+          repository: OlyMahmudMugdho/cne-k8s-manifests
+          ref: ${{ env.INFRA_BRANCH }}
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
+      - name: Set up Git
+        run: |
+          git config --global user.name "OlyMahmudMugdho"
+          git config --global user.email "OlyMahmudMugdho@proton.me"
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Update image tags in manifests
+        run: |
+          cd infra/k8s
+          SERVICES=("product" "order" "inventory" "ecommerce-ui")
+          for SERVICE in "${SERVICES[@]}"; do
+            DEPLOY_PATH="${SERVICE}-deployment.yaml"
+            echo "Updating $DEPLOY_PATH with new image tag..."
+            IMAGE_NAME="$DOCKER_HUB_USERNAME"
+            if [ "$SERVICE" = "ecommerce-ui" ]; then
+              IMAGE_NAME+="/cne-ecommerce-ui"
+            else
+              IMAGE_NAME+="/${SERVICE}-service"
+            fi
+            yq -i ".spec.template.spec.containers[0].image = \"$IMAGE_NAME:$IMAGE_TAG\"" "$DEPLOY_PATH"
+          done
+
+      - name: Update configmap.yaml with secret values
+        run: |
+          sed -i "s|REDIS_URL: .*|REDIS_URL: redis://${{ secrets.REDIS_KAFKA_VM_IP }}:6379|" infra/k8s/configmap.yaml
+          sed -i "s|KAFKA_BROKER: .*|KAFKA_BROKER: ${{ secrets.REDIS_KAFKA_VM_IP }}:9092|" infra/k8s/configmap.yaml
+          sed -i "s|MONGO_URL: .*|MONGO_URL: mongodb://${{ secrets.MONGODB_KEYCLOAK_VM_EXTERNAL_IP }}:27017|" infra/k8s/configmap.yaml
+          sed -i "s|CART_DB_URI: .*|CART_DB_URI: jdbc:postgresql://${{ secrets.SQL_INSTANCE_EXTERNAL_IP }}:5432/cart_db|" infra/k8s/configmap.yaml
+          sed -i "s|ORDER_DB_URI: .*|ORDER_DB_URI: jdbc:postgresql://${{ secrets.SQL_INSTANCE_EXTERNAL_IP }}:5432/order_db|" infra/k8s/configmap.yaml
+          sed -i "s|REDIS_HOST: .*|REDIS_HOST: ${{ secrets.REDIS_KAFKA_VM_IP }}|" infra/k8s/configmap.yaml
+          sed -i "s|INVENTORY_HOST: .*|INVENTORY_HOST: ${{ secrets.INVENTORY_HOST }}|" infra/k8s/configmap.yaml
+      - name: Commit and push changes
+        run: |
+          cd infra
+          git add k8s/*
+          git commit -m "Update image tags to $IMAGE_TAG"
+          git push origin $INFRA_BRANCH
+
+  sync-argocd:
+    needs: update-k8s-manifests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install ArgoCD CLI
+        run: |
+          curl -sSL -o argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+          chmod +x argocd
+          sudo mv argocd /usr/local/bin/argocd
+
+      - name: Login to ArgoCD
+        run: |
+          argocd login ${{ secrets.ARGOCD_SERVER }} \
+            --username ${{ secrets.ARGOCD_USERNAME }} \
+            --password ${{ secrets.ARGOCD_PASSWORD }} \
+            --insecure
+
+      - name: Sync Applications
+        run: |
+          echo "Syncing $APP..."
+          argocd app sync cloud-native-ecommerce --force
