@@ -31,7 +31,7 @@ kubectl patch svc prometheus-stack-grafana \
 helm repo add openzipkin https://openzipkin.github.io/zipkin
 helm repo update
 helm install zipkin openzipkin/zipkin --namespace cloud-native-ecommerce
-kubectl patch svc zipkin -n monitoring -p '{"spec": {"type": "LoadBalancer"}}'
+kubectl patch svc zipkin -n cloud-native-ecommerce -p '{"spec": {"type": "LoadBalancer"}}'
 
 
 ./get_vars.sh
