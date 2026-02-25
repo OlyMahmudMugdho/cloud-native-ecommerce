@@ -5,7 +5,7 @@
 **Department of Information and Communication Engineering**  
 **Pabna University of Science & Technology**
 
-**Academic Year**: 2024-2025  
+**Session**: 2020-2021
 **Course**: ICE-3211: Project Design and Development
 
 ---
