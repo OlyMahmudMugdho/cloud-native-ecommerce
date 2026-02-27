@@ -74,12 +74,12 @@ jobs:
           docker build -t $DOCKER_HUB_USERNAME/inventory-service:$IMAGE_TAG .
           docker push $DOCKER_HUB_USERNAME/inventory-service:$IMAGE_TAG
 
-      - name: Set up Java 21
+      - name: Set up Java 25
         if: matrix.service == 'product-service' || matrix.service == 'order-service'
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '21'
+          java-version: '25'
 
       - name: Build and Dockerize Spring Boot Services
         if: matrix.service == 'product-service' || matrix.service == 'order-service'
