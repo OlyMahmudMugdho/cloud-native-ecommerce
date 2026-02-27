@@ -22,6 +22,11 @@ jobs:
         with:
           go-version: '1.23'
 
+      - name: Download dependencies
+        run: |
+          cd inventory-service
+          go mod download
+
       - name: Run Inventory Service Tests
         run: |
           cd inventory-service
