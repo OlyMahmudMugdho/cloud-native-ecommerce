@@ -11,29 +11,43 @@ env:
   INFRA_BRANCH: main
 
 jobs:
-  test-inventory-service:
+  test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [inventory-service, product-service, order-service]
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Set up Go
+        if: matrix.service == 'inventory-service'
         uses: actions/setup-go@v4
         with:
           go-version: '1.23'
 
-      - name: Download dependencies
+      - name: Set up Java 25
+        if: matrix.service == 'product-service' || matrix.service == 'order-service'
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '25'
+
+      - name: Run Inventory Service Tests
+        if: matrix.service == 'inventory-service'
         run: |
           cd inventory-service
           go mod download
-
-      - name: Run Inventory Service Tests
-        run: |
-          cd inventory-service
           go test -v ./...
 
+      - name: Run Spring Boot Service Tests
+        if: matrix.service == 'product-service' || matrix.service == 'order-service'
+        run: |
+          cd ${{ matrix.service }}
+          ./mvnw test
+
   build-and-push:
-    needs: test-inventory-service
+    needs: test
     runs-on: ubuntu-latest
     strategy:
       matrix:

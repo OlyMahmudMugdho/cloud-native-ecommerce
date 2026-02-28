@@ -710,10 +710,14 @@ The system implements a hybrid authentication approach:
 **Pipeline Stages**:
 
 #### **1. Test Stage**
+
+**Matrix Strategy**: Parallel testing for all services (inventory-service, product-service, order-service)
+
+**Test Process for Each Service**:
 - Checkout source code from repository
-- Setup Go 1.23 environment
-- Download Go dependencies
-- Run inventory service unit tests
+- Setup environment (Go 1.23 for inventory-service, Java 25 for Spring Boot services)
+- Download dependencies
+- Run unit tests
 - Generate test coverage report
 - Fail pipeline if tests fail
 
@@ -1473,17 +1477,15 @@ cloud-native-ecommerce/
 ## **Contributors**
 
 **Project Team**:
-- **Name**: [Your Name]
-- **Student ID**: [Your ID]
-- **Email**: [Your Email]
+- **Name**: M. Oly Mahmud
+- **Email**: oly.210614@s.pust.ac.bd
 - **Department**: Information and Communication Engineering
 - **Institution**: Pabna University of Science & Technology
-- **Academic Year**: 2024-2025
+- **Session**: 2020-2021
 - **Course**: ICE-3211: Project Design and Development
 
 **Project Supervisor**:
-- **Name**: [Supervisor Name]
-- **Designation**: [Designation]
+- **Name**: Professor Dr. Md. Anwar Hossain
 - **Department**: Information and Communication Engineering
 
 ---
