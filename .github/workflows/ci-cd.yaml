@@ -155,8 +155,12 @@ jobs:
         run: |
           cd infra
           git add k8s/*
-          git commit -m "Update image tags to $IMAGE_TAG"
-          git push origin $INFRA_BRANCH
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update image tags to $IMAGE_TAG"
+            git push origin $INFRA_BRANCH
+          fi
 
   sync-argocd:
     needs: update-k8s-manifests
