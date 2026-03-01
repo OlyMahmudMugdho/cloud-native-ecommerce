@@ -1546,7 +1546,7 @@ cloud-native-ecommerce/
 
 **Project Team**:
 - **Name**: M. Oly Mahmud
-- **Email**: oly.210614@s.pust.ac.bd
+- **Email**: oly.210614@s.pust.ac.bd | oly.ice.pust@gmail.com | mugdhodzs38@gmail.com
 - **Department**: Information and Communication Engineering
 - **Institution**: Pabna University of Science & Technology
 - **Session**: 2020-2021
