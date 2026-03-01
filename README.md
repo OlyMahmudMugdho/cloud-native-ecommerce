@@ -28,9 +28,8 @@
 13. [Testing Strategy](#testing-strategy)
 14. [Project Structure](#project-structure)
 15. [Challenges & Learning Outcomes](#challenges--learning-outcomes)
-16. [Future Enhancements](#future-enhancements)
-17. [Contributors](#contributors)
-18. [References](#references)
+16. [Contributors](#contributors)
+17. [References](#references)
 
 ---
 
