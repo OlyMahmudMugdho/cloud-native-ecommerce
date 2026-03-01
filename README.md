@@ -973,21 +973,68 @@ The system implements a hybrid authentication approach:
 
 ## **Deployment Guide**
 
+> **📖 For detailed deployment instructions, see [DEPLOYMENT.md](DEPLOYMENT.md)**
+
+### **Quick Start - Production Deployment**
+
+The project includes an automated deployment system using Makefile orchestration:
+
+```bash
+# Validate prerequisites
+make check
+
+# Deploy complete infrastructure (5-10 minutes)
+make deploy-all
+
+# Or deploy individual stages
+make 01-infrastructure    # GCP infrastructure (Terraform) - 10-15 min
+make 02-configuration     # VM configuration (Ansible) - 5-10 min
+make 03-kubernetes        # K8s workloads - 2-3 min
+make 04-monitoring        # Prometheus, Grafana, Zipkin - 2-3 min
+make 05-finalize          # Extract variables & set secrets - 1 min
+```
+
+**Deployment Stages:**
+1. **01-infrastructure** - Provisions GCP resources (VPC, GKE, Cloud SQL, VMs)
+2. **02-configuration** - Configures VMs with Ansible (MongoDB, Redis, Kafka)
+3. **03-kubernetes** - Deploys microservices and ArgoCD to GKE (non-blocking)
+4. **04-monitoring** - Installs monitoring stack (Prometheus, Grafana, Zipkin)
+5. **05-finalize** - Extracts IPs and credentials, updates GitHub secrets
+
+**Note:** Pods start in background. Check status with:
+```bash
+kubectl get pods -n cloud-native-ecommerce
+kubectl get svc -n cloud-native-ecommerce  # LoadBalancer IPs take 5-10 min
+```
+
+**Cleanup:**
+```bash
+make destroy-all          # Destroy everything (with confirmation)
+make destroy-kubernetes   # Destroy only K8s workloads
+make destroy-monitoring   # Destroy only monitoring stack
+make destroy-infrastructure  # Destroy only GCP infrastructure
+```
+
+**Verbose Mode:**
+```bash
+make deploy-all VERBOSE=1  # Show detailed output
+```
+
 ### **Prerequisites**
 
-**Required Software**:
-- Docker 24.0+
-- Kubernetes 1.28+
-- kubectl CLI tool
-- Helm 3.13+
-- Terraform 1.5+
+**Required Tools**:
+- jq, yq, sponge (moreutils)
 - Ansible 2.15+
+- Terraform 1.5+
+- Helm 3.13+
+- kubectl
 - gcloud CLI (Google Cloud SDK)
-- Git 2.40+
-- Node.js 18.x+ (for frontend)
-- Go 1.23+ (for inventory service)
-- Java 25+ (for Spring Boot services)
-- Maven 3.9+
+
+**Required Files**:
+- `infrastructure/account.json` - GCP service account key
+- `infrastructure/terraform.tfvars` - Terraform variables
+- `ansible/inventory/inventory.ini` - Ansible inventory
+- `k8s/secret.yaml` - Kubernetes secrets (create from `k8s/secret-demo.yaml`)
 
 **Cloud Accounts**:
 - Google Cloud Platform account with billing enabled
@@ -996,6 +1043,27 @@ The system implements a hybrid authentication approach:
 - Stripe account (for payment integration)
 - Cloudinary account (for image management)
 - Netlify account (for frontend hosting)
+
+### **Setup Before Deployment**
+
+1. **Create Kubernetes secrets:**
+```bash
+cd k8s
+cp secret-demo.yaml secret.yaml
+# Edit secret.yaml with base64 encoded values
+```
+
+2. **Configure Terraform variables:**
+```bash
+cd infrastructure
+# Edit terraform.tfvars with your GCP project details
+```
+
+3. **Update Ansible inventory:**
+```bash
+cd ansible
+# Edit inventory/inventory.ini with VM IPs (after infrastructure deployment)
+```
 
 ### **Part 1: Local Development Setup**
 

@@ -6,16 +6,16 @@ metadata:
 data:
   SMTP_PORT: '587'
   SMTP_HOST: smtp.gmail.com
-  REDIS_URL: redis://34.78.175.223:6379
-  KAFKA_BROKER: 34.78.175.223:9092
+  REDIS_URL: redis://35.231.29.189:6379
+  KAFKA_BROKER: 35.231.29.189:9092
   KAFKA_EMAIL_TOPIC: email_notifications
-  MONGO_URL: mongodb://34.52.203.82:27017
+  MONGO_URL: mongodb://35.243.130.175:27017
   EMAIL_FROM: mugdhodzs38@gmail.com
-  CART_DB_URI: jdbc:postgresql://34.77.250.18:5432/cart_db
-  ORDER_DB_URI: jdbc:postgresql://34.77.250.18:5432/order_db
+  CART_DB_URI: jdbc:postgresql://34.23.11.140:5432/cart_db
+  ORDER_DB_URI: jdbc:postgresql://34.23.11.140:5432/order_db
   DB_USERNAME: mugdho
   DB_PASSWORD: admin
-  REDIS_HOST: 34.78.175.223
+  REDIS_HOST: 35.231.29.189
   REDIS_PORT: '6379'
   JWT_ISSUER_URI: https://lemur-15.cloud-iam.com/auth/realms/cloud-native-ecommerce
   JWT_SET_URI: https://lemur-15.cloud-iam.com/auth/realms/cloud-native-ecommerce/protocol/openid-connect/certs
